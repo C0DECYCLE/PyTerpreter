@@ -1,6 +1,8 @@
 Language Specification:
 	Values:
 		! Value must not be "illegal" !
+	Instructions:
+		! Open and close new environment !
 	Mathematical operations:
 		- add: ["add", number, number]: number
 		- sub: ["sub", number, number]: number
@@ -15,7 +17,7 @@ Language Specification:
 		! Get operation environment bottom to top !
 		! Set operation environment top to bottom !
 	Conditionals:
-		- if: ["if", boolean, then instructions, ?else instructions]: "illegal"
+		- if: ["if", boolean, instructions, ?else instructions]: "illegal"
 	Boolean operations:
 		- and: ["and", boolean, boolean]: boolean
 		- or: ["or", boolean, boolean]: boolean
