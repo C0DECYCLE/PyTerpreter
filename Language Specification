@@ -2,49 +2,62 @@ Language Specification:
 	Values:
 		! Value must not be "illegal" !
 	Mathematical operations:
-		add: ["add", number, number]: number
-		sub: ["sub", number, number]: number
-		abs: ["abs", number]: number
-		multiply: ["multiply", number, number]: number
-		division: ["division", number, number]: number
-		power: ["power", number, number]: number
+		- add: ["add", number, number]: number
+		- sub: ["sub", number, number]: number
+		- abs: ["abs", number]: number
+		- multiply: ["multiply", number, number]: number
+		- division: ["division", number, number]: number
+		- power: ["power", number, number]: number
 	Variables:
-		set: ["set", "name", value]: "illegal"
-		get: ["get", "name"]: value
+		- set: ["set", "name", value]: "illegal"
+		- get: ["get", "name"]: value
 		! Name must be ([A-Z]|[a-z])* !
-		! Next higher environment !
+		! Get operation environment bottom to top !
+		! Set operation environment top to bottom !
 	Conditionals:
-		if: ["if", boolean, then instructions, ?else instructions]: "illegal"
+		- if: ["if", boolean, then instructions, ?else instructions]: "illegal"
 	Boolean operations:
-		and: ["and", boolean, boolean]: boolean
-		or: ["or", boolean, boolean]: boolean
-		not: ["not", boolean]: boolean
-		equal: ["equal", value, value]: boolean
-		less: ["less", value, value]: boolean
-		greater: ["greater", value, value]: boolean
-		less equal: ["equalLess", value, value]: boolean
-		greater equal: ["equalGreater", value, value]: boolean
+		- and: ["and", boolean, boolean]: boolean
+		- or: ["or", boolean, boolean]: boolean
+		- not: ["not", boolean]: boolean
+		- equal: ["equal", value, value]: boolean
+		- less: ["less", value, value]: boolean
+		- greater: ["greater", value, value]: boolean
+		- less equal: ["equalLess", value, value]: boolean
+		- greater equal: ["equalGreater", value, value]: boolean
 	Functions:
-		function: ["function", "name"[], instructions]: ["function", "name"[], instructions]
+		- function: ["function", "parameter"[], instructions]: ["function", "parameter"[], instructions]
 	Function operations:
-		call: ["call", ["function", "name"[], instructions]]: value
-		?return: ["return", value]: "illegal"
+		- call: ["call", ["function", "parameter"[], instructions], value[]]: value
+		- ?return: ["return", value]: "illegal"
 		! No return then none !
 		! Return ends instructions !
-		! Return only in environment usage is function !
+		! Return only allowed when environment usage is function !
 	Loops:
-		while: ["while", boolean, instructions]: "illegal"
+		- while: ["while", boolean, instructions]: "illegal"
 	Array:
-		array: ["array", size]: list
+		- array: ["array", size]: list
 	Array operations:
-		set: ["arraySet", list, index, value]: "illegal"
-		get: ["arrayGet", list, index]: value
+		- set: ["arraySet", list, index, value]: "illegal"
+		- get: ["arrayGet", list, index]: value
 	Dictionaries:
-		dictionary: ["dictionary"]: dict
+		- dictionary: ["dictionary"]: dict
 	Dictionary operations:
-		set: ["dictionarySet", dict, key, value]: "illegal"
-		get: ["dictionaryGet", dict, key]: value
-		merge: ["dictionaryMerge", dict, dict]: dict
+		- set: ["dictionarySet", dict, "key", value]: "illegal"
+		- get: ["dictionaryGet", dict, "key"]: value
+		- merge: ["dictionaryMerge", dict, dict]: dict
 	System operations:
-		print: ["print", value]: "illegal"
-	OOP: ...
+		- print: ["print", value]: "illegal"
+	Class:
+	    - class: ["class", ?inheritance, instructions]: ["class", ?inheritance, instructions]
+	    ! Inheritance is entire class definition !
+	Class operations:
+	    - inherit: ["inherit", "function"]: ["function", "parameter"[], instructions]
+	    ! One and only one constructor !
+	    ! When inherited instructions get merged and overwritten ones get cached !
+	    ! Inherit operation fetches from cache !
+	Object:
+	    - object: ["object", ["class", ?inheritance, instructions], value[]]: environment
+	Object operations:
+	    - set: ["objectSet", environment, "name", value]: "illegal"
+	    - get: ["objectGet", environment, "name"]: value

@@ -1,0 +1,87 @@
+[
+    ["set", "Foo", ["class", [
+
+        ["set", "bar", 3],
+
+        ["set", "constructor", ["function", [], []]]
+
+        ["set", "add", ["function", [], []]]
+
+    ]]],
+
+    ["set", "Shape", ["class", ["get", "Foo"], [
+
+        ["set", "size", 0],
+
+        ["set", "constructor", ["function", ["shapeSize"], [
+            ["call", ["inherit", "constructor"], []],
+            ["set", "size", ["get", "shapeSize"]]
+        ]]]
+
+        ["set", "add", ["function", ["b"], [
+            ["call", ["inherit", "add"], []],
+            ["set", "result", ["add", ["get", "bar"], ["get", "b"]]]
+            ["return", ["get", "result"]]
+        ]]]
+    ]]],
+
+    ["set", "abc", ["object", ["get", "Shape"], [32]]],
+    ["print", ["objectGet", ["get", "abc"], "size"]],
+    ["print", ["call", ["objectGet", ["get", "abc"], "add"], [10]]],
+    ["objectSet", ["get", "abc], "size", 30]
+]
+
+class Foo {
+
+    public Foo() {}
+
+    int add() {}
+}
+
+class Shape extends Foo {
+
+    public int size;
+
+    public Shape(int shapeSize) {
+        super();
+        size = shapeSize;
+    }
+
+    int add(int b) {
+        super.add();
+        int result = size + b;
+        return result;
+    }
+}
+
+Shape abc = new Shape(32);
+print(abc.size);
+print(abc.add(10));
+abc.size = 30;
+
+int i = 0;
+while (i < 10) {
+    i = i + 1;
+}
+
+[
+    ["set", "i", 0],
+    ["while", ["less", ["get", "i"], 10], [
+        ["set", "i", ["add", ["get", "i"], 1]]
+    ]]
+]
+
+intrepeter
+- env = global env
+
+global env:
+- operationPreviousEnv = None
+- operationNextEnv = while env
+- variables = dict
+
+while env:
+- operationPreviousEnv = global env
+- operationNextEnv = None
+- variables = dict
+    - abc1: object env
+    - abc2: object env
