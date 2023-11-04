@@ -7,5 +7,9 @@
     ["set", "result", ["add", ["get", "a"], ["get", "b"]]],
     ["print", ["get", "result"]],
     ["set", "c", true],
-    ["print", ["get", "c"]]
+    ["print", ["get", "c"]],
+
+    ["print", ["equal", ["get", "a"], ["get", "b"]]],
+    ["print", ["and", ["get", "c"], false]],
+    ["print", ["or", ["get", "c"], false]]
 ]
