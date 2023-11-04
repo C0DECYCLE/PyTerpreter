@@ -16,10 +16,10 @@ class PyTerpreterUtils:
         PyTerpreterUtils.ensure(value != Illegal, "Illegal value occurred.")
 
     @staticmethod
-    def length(value: any, length: int) -> None:
+    def length(value: any, should: int) -> None:
         actual: int = len(value)
         PyTerpreterUtils.ensure(
-            actual == length, f"Invalid length occurred ({actual} -> {length})."
+            actual == should, f"Invalid length occurred ({actual} -> {should})."
         )
 
     @staticmethod
@@ -28,7 +28,7 @@ class PyTerpreterUtils:
         if type(should) is tuple:
             possibilities: list[str] = [possibility.__name__ for possibility in should]
             return PyTerpreterUtils.ensure(
-                sum([1 if actual == possibility else 0 for possibility in should]) > 0,
+                any([actual == possibility for possibility in should]),
                 f"Invalid type occurred ({type(value).__name__} -> {possibilities}).",
             )
         PyTerpreterUtils.ensure(
@@ -39,7 +39,7 @@ class PyTerpreterUtils:
     @staticmethod
     def includes(value: any, multi: any) -> None:
         PyTerpreterUtils.ensure(
-            value in multi, f"Nonexistent property occurred ({value} -> {multi})."
+            value in multi, f"Non-existent property occurred ({value} -> {multi})."
         )
 
 
