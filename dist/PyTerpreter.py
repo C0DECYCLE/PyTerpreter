@@ -102,37 +102,32 @@ class PyTerpreterSystem:
 
 class PyTerpreterBoolean:
     @staticmethod
-    def boolAnd(interpreter: PyTerpreter, args: list) -> bool:
+    def And(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
-        a: bool = interpreter.execute(args[0])
+        a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
-        PyTerpreterUtils.type(a, bool)
-        b: bool = interpreter.execute(args[1])
+        b: any = interpreter.execute(args[1])
         PyTerpreterUtils.notIllegal(b)
-        PyTerpreterUtils.type(b, bool)
         return a and b
 
     @staticmethod
-    def boolOr(interpreter: PyTerpreter, args: list) -> bool:
+    def Or(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
-        a: bool = interpreter.execute(args[0])
+        a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
-        PyTerpreterUtils.type(a, bool)
-        b: bool = interpreter.execute(args[1])
+        b: any = interpreter.execute(args[1])
         PyTerpreterUtils.notIllegal(b)
-        PyTerpreterUtils.type(b, bool)
         return a or b
 
     @staticmethod
-    def boolNot(interpreter: PyTerpreter, args: list) -> bool:
+    def Not(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 1)
-        a: bool = interpreter.execute(args[0])
+        a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
-        PyTerpreterUtils.type(a, bool)
         return not a
 
     @staticmethod
-    def boolEqual(interpreter: PyTerpreter, args: list) -> bool:
+    def Equal(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
         a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
@@ -141,7 +136,7 @@ class PyTerpreterBoolean:
         return a == b
 
     @staticmethod
-    def boolLess(interpreter: PyTerpreter, args: list) -> bool:
+    def Less(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
         a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
@@ -150,7 +145,7 @@ class PyTerpreterBoolean:
         return a < b
 
     @staticmethod
-    def boolGreater(interpreter: PyTerpreter, args: list) -> bool:
+    def Greater(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
         a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
@@ -159,7 +154,7 @@ class PyTerpreterBoolean:
         return a > b
 
     @staticmethod
-    def boolLessEqual(interpreter: PyTerpreter, args: list) -> bool:
+    def LessEqual(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
         a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
@@ -168,7 +163,7 @@ class PyTerpreterBoolean:
         return a <= b
 
     @staticmethod
-    def boolGreaterEqual(interpreter: PyTerpreter, args: list) -> bool:
+    def GreaterEqual(interpreter: PyTerpreter, args: list) -> bool:
         PyTerpreterUtils.length(args, 2)
         a: any = interpreter.execute(args[0])
         PyTerpreterUtils.notIllegal(a)
@@ -268,14 +263,14 @@ class PyTerpreter:
             "get": PyTerpreterVariable.get,
             "add": PyTerpreterMath.add,
             "print": PyTerpreterSystem.print,
-            "and": PyTerpreterBoolean.boolAnd,
-            "or": PyTerpreterBoolean.boolOr,
-            "not": PyTerpreterBoolean.boolNot,
-            "equal": PyTerpreterBoolean.boolEqual,
-            "less": PyTerpreterBoolean.boolLess,
-            "greater": PyTerpreterBoolean.boolGreater,
-            "lessEqual": PyTerpreterBoolean.boolLessEqual,
-            "greaterEqual": PyTerpreterBoolean.boolGreaterEqual,
+            "and": PyTerpreterBoolean.And,
+            "or": PyTerpreterBoolean.Or,
+            "not": PyTerpreterBoolean.Not,
+            "equal": PyTerpreterBoolean.Equal,
+            "less": PyTerpreterBoolean.Less,
+            "greater": PyTerpreterBoolean.Greater,
+            "lessEqual": PyTerpreterBoolean.LessEqual,
+            "greaterEqual": PyTerpreterBoolean.GreaterEqual,
         }
         self.execute(self.__load(cliArgs))
 
