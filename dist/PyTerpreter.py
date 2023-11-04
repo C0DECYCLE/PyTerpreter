@@ -106,10 +106,9 @@ class PyTerpreterEnvironment:
         self, usage: str, previous: PyTerpreterEnvironment | None = None
     ) -> None:
         self.__usage: str = usage
-        self.__previous: PyTerpreterEnvironment | None = previous
-        self.__next: PyTerpreterEnvironment | None = None
         self.__fields: dict = {}
         self.__isDestroyed: bool = False
+        self.__insertIntoTree(previous)
 
     @property
     def usage(self) -> str:
@@ -129,11 +128,22 @@ class PyTerpreterEnvironment:
     def setNext(self, next: PyTerpreterVariable | None) -> None:
         self.__next = next
 
+    def __insertIntoTree(self, previous: PyTerpreterEnvironment | None):
+        self.setPrevious(previous)
+        self.setNext(None)
+        if self.previous is None:
+            return
+        PyTerpreterUtils.ensure(
+            self.previous.next is None,
+            "Illegal environment tree insertion.",
+        )
+        self.previous.setNext(self)
+
     def lowest(self) -> PyTerpreterEnvironment:
         self.__notDestroyed()
-        if self.__next is None:
+        if self.next is None:
             return self
-        return self.__next.lowest()
+        return self.next.lowest()
 
     def store(self, name: str, value: any) -> None:
         self.__notDestroyed()
@@ -158,9 +168,16 @@ class PyTerpreterEnvironment:
     def destroy(self) -> None:
         self.__notDestroyed()
         self.__isDestroyed = True
+        self.__removeFromTree()
         self.__fields.clear()
-        self.__next = None
-        self.__previous = None
+
+    def __removeFromTree(self):
+        PyTerpreterUtils.ensure(
+            self.next is None,
+            "Illegal environment tree removal.",
+        )
+        self.previous.setNext(None)
+        self.setPrevious(None)
 
     def __notDestroyed(self) -> None:
         PyTerpreterUtils.ensure(
@@ -197,10 +214,8 @@ class PyTerpreter:
     def __executeSequence(self, sequence: list) -> None:
         above: PyTerpreterEnvironment = self.environment.lowest()
         environment: PyTerpreterEnvironment = PyTerpreterEnvironment("sequence", above)
-        above.setNext(environment)
         for program in sequence:
             self.execute(program)
-        above.setNext(None)
         environment.destroy()
 
     def __executeOperation(self, program: list) -> any:
