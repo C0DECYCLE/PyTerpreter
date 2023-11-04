@@ -26,8 +26,8 @@ Language Specification:
 		- equal: ["equal", value, value]: boolean
 		- less: ["less", value, value]: boolean
 		- greater: ["greater", value, value]: boolean
-		- less equal: ["equalLess", value, value]: boolean
-		- greater equal: ["equalGreater", value, value]: boolean
+		- less equal: ["lessEqual", value, value]: boolean
+		- greater equal: ["greaterEqual", value, value]: boolean
 	Functions:
 		- function: ["function", "parameter"[], instructions]: ["function", "parameter"[], instructions]
 	Function operations:
