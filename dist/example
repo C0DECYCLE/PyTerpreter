@@ -1,4 +1,5 @@
 [
+    ["print", "--------------------System Fundamentals----------------------"],
     ["print", "Hello World!"],
     ["set", "a", 2],
     ["print", ["get", "a"]],
@@ -7,5 +8,21 @@
     ["set", "result", ["add", ["get", "a"], ["get", "b"]]],
     ["print", ["get", "result"]],
     ["set", "c", true],
-    ["print", ["get", "c"]]
+    ["print", ["get", "c"]],
+
+    ["print", "\n--------------------Boolean Operations----------------------"],
+
+    ["set", "a", 4],
+    ["set", "b", 5],
+    ["set", "c", 4],
+    ["set", "d", true],
+
+    ["print", ["equal", ["get", "a"], ["get", "c"]]],
+    ["print", ["and", ["get", "d"], false]],
+    ["print", ["or", ["get", "d"], false]],
+    ["print", ["not", true]],
+    ["print", ["less", 5, 10]],
+    ["print", ["greater", 5, 10]],
+    ["print", ["lessEqual", 5, 5]],
+    ["print", ["greaterEqual", 5, 10]]
 ]

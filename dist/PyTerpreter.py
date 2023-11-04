@@ -7,105 +7,177 @@ Illegal = "illegal"
 
 class PyTerpreterUtils:
     @staticmethod
-    def ensure(condition: bool, message: str) -> None:
+    def Ensure(condition: bool, message: str) -> None:
         if not condition:
             raise SystemExit(f"PyTerpreter: {message}")
 
     @staticmethod
-    def notIllegal(value: any) -> None:
-        PyTerpreterUtils.ensure(value != Illegal, "Illegal value occurred.")
+    def NotIllegal(value: any) -> None:
+        PyTerpreterUtils.Ensure(value != Illegal, "Illegal value occurred.")
 
     @staticmethod
-    def length(value: any, should: int) -> None:
+    def Length(value: any, should: int) -> None:
         actual: int = len(value)
-        PyTerpreterUtils.ensure(
+        PyTerpreterUtils.Ensure(
             actual == should, f"Invalid length occurred ({actual} -> {should})."
         )
 
     @staticmethod
-    def type(value: any, should: any) -> None:
+    def Type(value: any, should: any) -> None:
         actual: any = type(value)
         if type(should) is tuple:
             possibilities: list[str] = [possibility.__name__ for possibility in should]
-            return PyTerpreterUtils.ensure(
+            return PyTerpreterUtils.Ensure(
                 any([actual == possibility for possibility in should]),
                 f"Invalid type occurred ({type(value).__name__} -> {possibilities}).",
             )
-        PyTerpreterUtils.ensure(
+        PyTerpreterUtils.Ensure(
             actual == should,
             f"Invalid type occurred ({type(value).__name__} -> {should.__name__}).",
         )
 
     @staticmethod
-    def includes(value: any, multi: any) -> None:
-        PyTerpreterUtils.ensure(
+    def Includes(value: any, multi: any) -> None:
+        PyTerpreterUtils.Ensure(
             value in multi, f"Non-existent property occurred ({value} -> {multi})."
         )
 
 
 class PyTerpreterVariable:
     @staticmethod
-    def set(interpreter: PyTerpreter, args: list) -> Illegal:
-        PyTerpreterUtils.length(args, 2)
+    def Set(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterUtils.Length(args, 2)
         name: str = args[0]
-        PyTerpreterUtils.type(name, str)
-        PyTerpreterUtils.notIllegal(name)
+        PyTerpreterUtils.Type(name, str)
+        PyTerpreterUtils.NotIllegal(name)
         value: any = interpreter.execute(args[1])
-        PyTerpreterUtils.notIllegal(value)
-        return PyTerpreterVariable.__storeDownwards(
+        PyTerpreterUtils.NotIllegal(value)
+        return PyTerpreterVariable.__StoreDownwards(
             name, value, interpreter.environment
         )
 
     @staticmethod
-    def __storeDownwards(name: str, value: any, top: PyTerpreterEnvironment) -> Illegal:
+    def __StoreDownwards(name: str, value: any, top: PyTerpreterEnvironment) -> Illegal:
         if top.exists(name) or top.next is None:
             top.store(name, value)
             return Illegal
-        return PyTerpreterVariable.__storeDownwards(name, value, top.next)
+        return PyTerpreterVariable.__StoreDownwards(name, value, top.next)
 
     @staticmethod
-    def get(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.length(args, 1)
+    def Get(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 1)
         name: str = args[0]
-        PyTerpreterUtils.type(name, str)
-        PyTerpreterUtils.notIllegal(name)
-        return PyTerpreterVariable.__retrieveUpwards(
+        PyTerpreterUtils.Type(name, str)
+        PyTerpreterUtils.NotIllegal(name)
+        return PyTerpreterVariable.__RetrieveUpwards(
             name, interpreter.environment.lowest()
         )
 
     @staticmethod
-    def __retrieveUpwards(name: str, bottom: PyTerpreterEnvironment) -> any:
+    def __RetrieveUpwards(name: str, bottom: PyTerpreterEnvironment) -> any:
         if bottom.exists(name) or bottom.previous is None:
             return bottom.retrieve(name)
-        return PyTerpreterVariable.__retrieveUpwards(name, bottom.previous)
+        return PyTerpreterVariable.__RetrieveUpwards(name, bottom.previous)
 
 
 class PyTerpreterMath:
     @staticmethod
-    def add(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.length(args, 2)
+    def Add(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.notIllegal(a)
+        PyTerpreterUtils.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.notIllegal(b)
+        PyTerpreterUtils.NotIllegal(b)
         return a + b
 
 
 class PyTerpreterSystem:
     @staticmethod
-    def print(interpreter: PyTerpreter, args: list) -> Illegal:
-        PyTerpreterUtils.length(args, 1)
+    def Print(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterUtils.Length(args, 1)
         value: any = interpreter.execute(args[0])
-        PyTerpreterUtils.notIllegal(value)
+        PyTerpreterUtils.NotIllegal(value)
         print(value)
         return Illegal
 
+class PyTerpreterBoolean:
+    @staticmethod
+    def And(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a and b
+
+    @staticmethod
+    def Or(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a or b
+
+    @staticmethod
+    def Not(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 1)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        return not a
+
+    @staticmethod
+    def Equal(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a == b
+
+    @staticmethod
+    def Less(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a < b
+
+    @staticmethod
+    def Greater(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a > b
+
+    @staticmethod
+    def LessEqual(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a <= b
+
+    @staticmethod
+    def GreaterEqual(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a >= b
 
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
     ) -> None:
         self.__usage: str = usage
+        self.__previous: PyTerpreterEnvironment | None = None
+        self.__next: PyTerpreterEnvironment | None = None
         self.__fields: dict = {}
         self.__isDestroyed: bool = False
         self.__insertIntoTree(previous)
@@ -133,7 +205,7 @@ class PyTerpreterEnvironment:
         self.setNext(None)
         if self.previous is None:
             return
-        PyTerpreterUtils.ensure(
+        PyTerpreterUtils.Ensure(
             self.previous.next is None,
             "Illegal environment tree insertion.",
         )
@@ -147,22 +219,22 @@ class PyTerpreterEnvironment:
 
     def store(self, name: str, value: any) -> None:
         self.__notDestroyed()
-        PyTerpreterUtils.type(name, str)
-        PyTerpreterUtils.notIllegal(name)
-        PyTerpreterUtils.notIllegal(value)
+        PyTerpreterUtils.Type(name, str)
+        PyTerpreterUtils.NotIllegal(name)
+        PyTerpreterUtils.NotIllegal(value)
         self.__fields[name] = value
 
     def exists(self, name: str) -> bool:
         self.__notDestroyed()
-        PyTerpreterUtils.type(name, str)
-        PyTerpreterUtils.notIllegal(name)
+        PyTerpreterUtils.Type(name, str)
+        PyTerpreterUtils.NotIllegal(name)
         return name in self.__fields
 
     def retrieve(self, name: str) -> any:
         self.__notDestroyed()
-        PyTerpreterUtils.type(name, str)
-        PyTerpreterUtils.notIllegal(name)
-        PyTerpreterUtils.includes(name, self.__fields)
+        PyTerpreterUtils.Type(name, str)
+        PyTerpreterUtils.NotIllegal(name)
+        PyTerpreterUtils.Includes(name, self.__fields)
         return self.__fields[name]
 
     def destroy(self) -> None:
@@ -172,7 +244,7 @@ class PyTerpreterEnvironment:
         self.__fields.clear()
 
     def __removeFromTree(self):
-        PyTerpreterUtils.ensure(
+        PyTerpreterUtils.Ensure(
             self.next is None,
             "Illegal environment tree removal.",
         )
@@ -180,7 +252,7 @@ class PyTerpreterEnvironment:
         self.setPrevious(None)
 
     def __notDestroyed(self) -> None:
-        PyTerpreterUtils.ensure(
+        PyTerpreterUtils.Ensure(
             not self.__isDestroyed, "Illegal use of destroyed environment."
         )
 
@@ -189,20 +261,28 @@ class PyTerpreter:
     def __init__(self, cliArgs: list[str]) -> None:
         self.environment: PyTerpreterEnvironment = PyTerpreterEnvironment("global")
         self.__operations: dict[str, callable] = {
-            "set": PyTerpreterVariable.set,
-            "get": PyTerpreterVariable.get,
-            "add": PyTerpreterMath.add,
-            "print": PyTerpreterSystem.print,
+            "set": PyTerpreterVariable.Set,
+            "get": PyTerpreterVariable.Get,
+            "add": PyTerpreterMath.Add,
+            "print": PyTerpreterSystem.Print,
+            "and": PyTerpreterBoolean.And,
+            "or": PyTerpreterBoolean.Or,
+            "not": PyTerpreterBoolean.Not,
+            "equal": PyTerpreterBoolean.Equal,
+            "less": PyTerpreterBoolean.Less,
+            "greater": PyTerpreterBoolean.Greater,
+            "lessEqual": PyTerpreterBoolean.LessEqual,
+            "greaterEqual": PyTerpreterBoolean.GreaterEqual,
         }
         self.execute(self.__load(cliArgs))
 
     def __load(self, cliArgs: list[str]) -> any:
-        PyTerpreterUtils.length(cliArgs, 2)
+        PyTerpreterUtils.Length(cliArgs, 2)
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
 
     def execute(self, program: any) -> any:
-        PyTerpreterUtils.notIllegal(program)
+        PyTerpreterUtils.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
                 self.__executeSequence(program)
@@ -220,8 +300,8 @@ class PyTerpreter:
 
     def __executeOperation(self, program: list) -> any:
         operator: str = program[0]
-        PyTerpreterUtils.type(operator, str)
-        PyTerpreterUtils.includes(operator, self.__operations)
+        PyTerpreterUtils.Type(operator, str)
+        PyTerpreterUtils.Includes(operator, self.__operations)
         return self.__operations[operator](self, program[1:])
 
 
