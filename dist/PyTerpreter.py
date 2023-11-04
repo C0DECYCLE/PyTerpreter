@@ -100,6 +100,81 @@ class PyTerpreterSystem:
         print(value)
         return Illegal
 
+class PyTerpreterBoolean:
+    @staticmethod
+    def boolAnd(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: bool = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        PyTerpreterUtils.type(a, bool)
+        b: bool = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        PyTerpreterUtils.type(b, bool)
+        return a and b
+
+    @staticmethod
+    def boolOr(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: bool = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        PyTerpreterUtils.type(a, bool)
+        b: bool = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        PyTerpreterUtils.type(b, bool)
+        return a or b
+
+    @staticmethod
+    def boolNot(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 1)
+        a: bool = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        PyTerpreterUtils.type(a, bool)
+        return not a
+
+    @staticmethod
+    def boolEqual(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        return a == b
+
+    @staticmethod
+    def boolLess(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        return a < b
+
+    @staticmethod
+    def boolGreater(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        return a > b
+
+    @staticmethod
+    def boolLessEqual(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        return a <= b
+
+    @staticmethod
+    def boolGreaterEqual(interpreter: PyTerpreter, args: list) -> bool:
+        PyTerpreterUtils.length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
+        return a >= b
 
 class PyTerpreterEnvironment:
     def __init__(
