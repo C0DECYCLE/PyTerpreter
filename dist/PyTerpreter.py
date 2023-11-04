@@ -119,12 +119,12 @@ class PyTerpreterEnvironment:
     def previous(self) -> PyTerpreterEnvironment | None:
         return self.__previous
 
-    def setPrevious(self, previous: PyTerpreterVariable | None) -> None:
-        self.__previous = previous
-
     @property
     def next(self) -> PyTerpreterEnvironment | None:
         return self.__next
+
+    def setPrevious(self, previous: PyTerpreterVariable | None) -> None:
+        self.__previous = previous
 
     def setNext(self, next: PyTerpreterVariable | None) -> None:
         self.__next = next
@@ -171,15 +171,15 @@ class PyTerpreterEnvironment:
 class PyTerpreter:
     def __init__(self, cliArgs: list[str]) -> None:
         self.environment: PyTerpreterEnvironment = PyTerpreterEnvironment("global")
-        self.operations: dict[str, callable] = {
+        self.__operations: dict[str, callable] = {
             "set": PyTerpreterVariable.set,
             "get": PyTerpreterVariable.get,
             "add": PyTerpreterMath.add,
             "print": PyTerpreterSystem.print,
         }
-        self.execute(self.load(cliArgs))
+        self.execute(self.__load(cliArgs))
 
-    def load(self, cliArgs: list[str]) -> any:
+    def __load(self, cliArgs: list[str]) -> any:
         PyTerpreterUtils.length(cliArgs, 2)
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
@@ -188,13 +188,13 @@ class PyTerpreter:
         PyTerpreterUtils.notIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
-                self.executeSequence(program)
+                self.__executeSequence(program)
             else:
-                return self.executeOperation(program)
+                return self.__executeOperation(program)
         else:
             return program
 
-    def executeSequence(self, sequence: list) -> None:
+    def __executeSequence(self, sequence: list) -> None:
         above: PyTerpreterEnvironment = self.environment.lowest()
         environment: PyTerpreterEnvironment = PyTerpreterEnvironment("sequence", above)
         above.setNext(environment)
@@ -203,11 +203,11 @@ class PyTerpreter:
         above.setNext(None)
         environment.destroy()
 
-    def executeOperation(self, program: list) -> any:
+    def __executeOperation(self, program: list) -> any:
         operator: str = program[0]
         PyTerpreterUtils.type(operator, str)
-        PyTerpreterUtils.includes(operator, self.operations)
-        return self.operations[operator](self, program[1:])
+        PyTerpreterUtils.includes(operator, self.__operations)
+        return self.__operations[operator](self, program[1:])
 
 
 if __name__ == "__main__":
