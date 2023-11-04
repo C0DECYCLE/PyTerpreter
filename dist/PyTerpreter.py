@@ -268,6 +268,14 @@ class PyTerpreter:
             "get": PyTerpreterVariable.get,
             "add": PyTerpreterMath.add,
             "print": PyTerpreterSystem.print,
+            "and": PyTerpreterBoolean.boolAnd,
+            "or": PyTerpreterBoolean.boolOr,
+            "not": PyTerpreterBoolean.boolNot,
+            "equal": PyTerpreterBoolean.boolEqual,
+            "less": PyTerpreterBoolean.boolLess,
+            "greater": PyTerpreterBoolean.boolGreater,
+            "lessEqual": PyTerpreterBoolean.boolLessEqual,
+            "greaterEqual": PyTerpreterBoolean.boolGreaterEqual,
         }
         self.execute(self.__load(cliArgs))
 
