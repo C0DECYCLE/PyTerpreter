@@ -11,12 +11,12 @@ Language Specification:
 		! Get operation environment bottom to top !
 		! Set operation environment top to bottom !
 	Mathematical operations:
-		- add: ["add", number, number]: number
-		- sub: ["sub", number, number]: number
-		- abs: ["abs", number]: number
-		- multiply: ["multiply", number, number]: number
-		- division: ["division", number, number]: number
-		- power: ["power", number, number]: number
+		- add: ["add", value, value]: value
+		- sub: ["sub", value, value]: value
+		- abs: ["abs", value]: value
+		- multiply: ["multiply", value, value]: value
+		- division: ["division", value, value]: value
+		- power: ["power", value, value]: value
 	Conditionals:
 		- if: ["if", boolean, instructions, ?else instructions]: "illegal"
 	Boolean operations:

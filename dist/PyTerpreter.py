@@ -82,12 +82,12 @@ class PyTerpreterVariable:
 
 class PyTerpreterMath:
     @staticmethod
-    def add(interpreter: PyTerpreter, args: list) -> int | float:
+    def add(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterUtils.length(args, 2)
-        a: int | float = interpreter.execute(args[0])
-        PyTerpreterUtils.type(a, (int, float))
-        b: int | float = interpreter.execute(args[1])
-        PyTerpreterUtils.type(b, (int, float))
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.notIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.notIllegal(b)
         return a + b
 
 
