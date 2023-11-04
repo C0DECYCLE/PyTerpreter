@@ -1,21 +1,22 @@
 Language Specification:
 	Values:
-		! Value must not be "illegal" !
+	    ! Number is int or float !
+	    ! Primitives are number, string and boolean (lowercase) !
+		! Value cannot be "illegal" !
 	Instructions:
 		! Open and close new environment !
-	Mathematical operations:
-		- add: ["add", number, number]: number
-		- sub: ["sub", number, number]: number
-		- abs: ["abs", number]: number
-		- multiply: ["multiply", number, number]: number
-		- division: ["division", number, number]: number
-		- power: ["power", number, number]: number
 	Variables:
 		- set: ["set", "name", value]: "illegal"
 		- get: ["get", "name"]: value
-		! Name must be ([A-Z]|[a-z])* !
 		! Get operation environment bottom to top !
 		! Set operation environment top to bottom !
+	Mathematical operations:
+		- add: ["add", value, value]: value
+		- sub: ["sub", value, value]: value
+		- abs: ["abs", value]: value
+		- multiply: ["multiply", value, value]: value
+		- division: ["division", value, value]: value
+		- power: ["power", value, value]: value
 	Conditionals:
 		- if: ["if", boolean, instructions, ?else instructions]: "illegal"
 	Boolean operations:
@@ -25,8 +26,8 @@ Language Specification:
 		- equal: ["equal", value, value]: boolean
 		- less: ["less", value, value]: boolean
 		- greater: ["greater", value, value]: boolean
-		- less equal: ["equalLess", value, value]: boolean
-		- greater equal: ["equalGreater", value, value]: boolean
+		- less equal: ["lessEqual", value, value]: boolean
+		- greater equal: ["greaterEqual", value, value]: boolean
 	Functions:
 		- function: ["function", "parameter"[], instructions]: ["function", "parameter"[], instructions]
 	Function operations:
@@ -48,8 +49,6 @@ Language Specification:
 		- set: ["dictionarySet", dict, "key", value]: "illegal"
 		- get: ["dictionaryGet", dict, "key"]: value
 		- merge: ["dictionaryMerge", dict, dict]: dict
-	System operations:
-		- print: ["print", value]: "illegal"
 	Class:
 	    - class: ["class", ?inheritance, instructions]: ["class", ?inheritance, instructions]
 	    ! Inheritance is entire class definition !
@@ -63,3 +62,5 @@ Language Specification:
 	Object operations:
 	    - set: ["objectSet", environment, "name", value]: "illegal"
 	    - get: ["objectGet", environment, "name"]: value
+	System operations:
+		- print: ["print", value]: "illegal"
