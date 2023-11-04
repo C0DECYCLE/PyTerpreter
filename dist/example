@@ -1,0 +1,11 @@
+[
+    ["print", "Hello World!"],
+    ["set", "a", 2],
+    ["print", ["get", "a"]],
+    ["set", "b", ["add", 3, 4]],
+    ["print", ["get", "b"]],
+    ["set", "result", ["add", ["get", "a"], ["get", "b"]]],
+    ["print", ["get", "result"]],
+    ["set", "c", true],
+    ["print", ["get", "c"]]
+]
