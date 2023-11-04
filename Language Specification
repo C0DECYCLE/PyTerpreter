@@ -1,8 +1,15 @@
 Language Specification:
 	Values:
-		! Value must not be "illegal" !
+	    ! Number is int or float !
+	    ! Primitives are number, string and boolean (lowercase) !
+		! Value cannot be "illegal" !
 	Instructions:
 		! Open and close new environment !
+	Variables:
+		- set: ["set", "name", value]: "illegal"
+		- get: ["get", "name"]: value
+		! Get operation environment bottom to top !
+		! Set operation environment top to bottom !
 	Mathematical operations:
 		- add: ["add", number, number]: number
 		- sub: ["sub", number, number]: number
@@ -10,12 +17,6 @@ Language Specification:
 		- multiply: ["multiply", number, number]: number
 		- division: ["division", number, number]: number
 		- power: ["power", number, number]: number
-	Variables:
-		- set: ["set", "name", value]: "illegal"
-		- get: ["get", "name"]: value
-		! Name must be ([A-Z]|[a-z])* !
-		! Get operation environment bottom to top !
-		! Set operation environment top to bottom !
 	Conditionals:
 		- if: ["if", boolean, instructions, ?else instructions]: "illegal"
 	Boolean operations:
@@ -48,8 +49,6 @@ Language Specification:
 		- set: ["dictionarySet", dict, "key", value]: "illegal"
 		- get: ["dictionaryGet", dict, "key"]: value
 		- merge: ["dictionaryMerge", dict, dict]: dict
-	System operations:
-		- print: ["print", value]: "illegal"
 	Class:
 	    - class: ["class", ?inheritance, instructions]: ["class", ?inheritance, instructions]
 	    ! Inheritance is entire class definition !
@@ -63,3 +62,5 @@ Language Specification:
 	Object operations:
 	    - set: ["objectSet", environment, "name", value]: "illegal"
 	    - get: ["objectGet", environment, "name"]: value
+	System operations:
+		- print: ["print", value]: "illegal"
