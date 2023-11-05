@@ -16,7 +16,7 @@ class PyTerpreterUtils:
         PyTerpreterUtils.Ensure(value != Illegal, "Illegal value occurred.")
 
     @staticmethod
-    def Length(value: any, should: any) -> None:
+    def Length(value: any, should: any) -> any:
         actual: int = len(value)
         if type(should) is tuple:
             PyTerpreterUtils.Ensure(
@@ -263,8 +263,8 @@ class PyTerpreterConditional:
     def If(interpreter: PyTerpreter, args: list) -> Illegal:
         length = PyTerpreterUtils.Length(args, (2, 3))
         b = args[0]
-        PyTerpreterUtils.NotIllegal(b)
         b = interpreter.execute(b)
+        PyTerpreterUtils.NotIllegal(b)
         if b:
             ifTrue = args[1]
             PyTerpreterUtils.NotIllegal(ifTrue)
