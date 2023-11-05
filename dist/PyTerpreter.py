@@ -16,8 +16,14 @@ class PyTerpreterUtils:
         PyTerpreterUtils.Ensure(value != Illegal, "Illegal value occurred.")
 
     @staticmethod
-    def Length(value: any, should: int) -> None:
+    def Length(value: any, should: any) -> None:
         actual: int = len(value)
+        if type(should) == tuple:
+            PyTerpreterUtils.Ensure(
+                any(actual == possibility for possibility in should),
+                f"Invalid length occurred ({actual} -> {should})",
+            )
+            return actual
         PyTerpreterUtils.Ensure(
             actual == should, f"Invalid length occurred ({actual} -> {should})."
         )
@@ -28,12 +34,19 @@ class PyTerpreterUtils:
         if type(should) is tuple:
             possibilities: list[str] = [possibility.__name__ for possibility in should]
             return PyTerpreterUtils.Ensure(
-                any([actual == possibility for possibility in should]),
+                any(actual == possibility for possibility in should),
                 f"Invalid type occurred ({type(value).__name__} -> {possibilities}).",
             )
         PyTerpreterUtils.Ensure(
             actual == should,
             f"Invalid type occurred ({type(value).__name__} -> {should.__name__}).",
+        )
+
+    @staticmethod
+    def MustSequence(value: any) -> None:
+        PyTerpreterUtils.Ensure(
+            type(value) == list and type(value[0]) == list,
+            f"No sequence where a sequence has to be",
         )
 
     @staticmethod
@@ -245,6 +258,29 @@ class PyTerpreterBoolean:
     }
 
 
+class PyTerpreterConditional:
+    @staticmethod
+    def If(Interpreter: PyTerpreter, args: list) -> Illegal:
+        length = PyTerpreterUtils.Length(args, (2, 3))
+        b = Interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterUtils.Type(b, bool)
+        if b:
+            ifTrue = args[1]
+            PyTerpreterUtils.NotIllegal(ifTrue)
+            PyTerpreterUtils.MustSequence(ifTrue)
+            Interpreter.execute(ifTrue)
+        elif length == 3:
+            ifFalse = args[2]
+            PyTerpreterUtils.NotIllegal(ifFalse)
+            PyTerpreterUtils.MustSequence(ifFalse)
+            Interpreter.execute(ifFalse)
+
+        return Illegal
+
+    Operations: dict = {"if": If}
+
+
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
@@ -268,10 +304,10 @@ class PyTerpreterEnvironment:
     def next(self) -> PyTerpreterEnvironment | None:
         return self.__next
 
-    def setPrevious(self, previous: PyTerpreterVariable | None) -> None:
+    def setPrevious(self, previous: PyTerpreterEnvironment | None) -> None:
         self.__previous = previous
 
-    def setNext(self, next: PyTerpreterVariable | None) -> None:
+    def setNext(self, next: PyTerpreterEnvironment | None) -> None:
         self.__next = next
 
     def __insertIntoTree(self, previous: PyTerpreterEnvironment | None):
@@ -339,6 +375,7 @@ class PyTerpreter:
             **PyTerpreterMath.Operations,
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
+            **PyTerpreterConditional.Operations,
         }
         self.execute(self.__load(cliArgs))
 
