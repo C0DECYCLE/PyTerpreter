@@ -1,5 +1,6 @@
 [
     ["print", "--------------------System Fundamentals----------------------"],
+
     ["print", "Hello World!"],
     ["set", "a", 2],
     ["print", ["get", "a"]],
@@ -42,5 +43,28 @@
     ["print", ["absolute", ["get", "b"]]],
     ["print", ["divide", 10, 2]],
     ["print", ["power", 10 , ["get", "c"]]],
-    ["print", ["add", ["get", "e"], "bar"]]
+    ["print", ["add", ["get", "e"], "bar"]],
+
+
+    ["print", "\n--------------------Conditionals----------------------"],
+
+    ["set", "a", 4],
+    ["set", "c", 4],
+
+    ["if", true, [
+        ["print", 3]
+    ]],
+    ["if", false, [
+        ["print", 3]
+    ], [
+        ["print", 4]
+    ]],
+    ["if", false, [
+        ["print", 3]
+    ]],
+    ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]] , [
+        ["print", 3]
+    ], [
+        ["print", 4]
+    ]]
 ]

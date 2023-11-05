@@ -5,7 +5,7 @@ import sys
 Illegal = "illegal"
 
 
-class PyTerpreterUtils:
+class PyTerpreterEnsure:
     @staticmethod
     def Ensure(condition: bool, message: str) -> None:
         if not condition:
@@ -13,32 +13,46 @@ class PyTerpreterUtils:
 
     @staticmethod
     def NotIllegal(value: any) -> None:
-        PyTerpreterUtils.Ensure(value != Illegal, "Illegal value occurred.")
+        PyTerpreterEnsure.Ensure(value != Illegal, "Illegal value occurred.")
 
     @staticmethod
-    def Length(value: any, should: int) -> None:
+    def Length(value: any, should: any) -> int:
         actual: int = len(value)
-        PyTerpreterUtils.Ensure(
-            actual == should, f"Invalid length occurred ({actual} -> {should})."
-        )
+        if type(should) is tuple:
+            PyTerpreterEnsure.Ensure(
+                any(actual == possibility for possibility in should),
+                f"Invalid length occurred ({actual} -> {should})",
+            )
+        else:
+            PyTerpreterEnsure.Ensure(
+                actual == should, f"Invalid length occurred ({actual} -> {should})."
+            )
+        return actual
 
     @staticmethod
     def Type(value: any, should: any) -> None:
         actual: any = type(value)
         if type(should) is tuple:
             possibilities: list[str] = [possibility.__name__ for possibility in should]
-            return PyTerpreterUtils.Ensure(
-                any([actual == possibility for possibility in should]),
+            return PyTerpreterEnsure.Ensure(
+                any(actual == possibility for possibility in should),
                 f"Invalid type occurred ({type(value).__name__} -> {possibilities}).",
             )
-        PyTerpreterUtils.Ensure(
+        PyTerpreterEnsure.Ensure(
             actual == should,
             f"Invalid type occurred ({type(value).__name__} -> {should.__name__}).",
         )
 
     @staticmethod
+    def Sequence(value: any) -> None:
+        PyTerpreterEnsure.Ensure(
+            type(value) is list and type(value[0]) is list,
+            f"Missing sequence occurred.",
+        )
+
+    @staticmethod
     def Includes(value: any, multi: any) -> None:
-        PyTerpreterUtils.Ensure(
+        PyTerpreterEnsure.Ensure(
             value in multi, f"Non-existent property occurred ({value} -> {multi})."
         )
 
@@ -46,12 +60,12 @@ class PyTerpreterUtils:
 class PyTerpreterVariable:
     @staticmethod
     def Set(interpreter: PyTerpreter, args: list) -> Illegal:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         name: str = args[0]
-        PyTerpreterUtils.Type(name, str)
-        PyTerpreterUtils.NotIllegal(name)
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
         value: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(value)
+        PyTerpreterEnsure.NotIllegal(value)
         return PyTerpreterVariable.__StoreDownwards(
             name, value, interpreter.environment
         )
@@ -65,10 +79,10 @@ class PyTerpreterVariable:
 
     @staticmethod
     def Get(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 1)
+        PyTerpreterEnsure.Length(args, 1)
         name: str = args[0]
-        PyTerpreterUtils.Type(name, str)
-        PyTerpreterUtils.NotIllegal(name)
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
         return PyTerpreterVariable.__RetrieveUpwards(
             name, interpreter.environment.lowest()
         )
@@ -88,54 +102,54 @@ class PyTerpreterVariable:
 class PyTerpreterMath:
     @staticmethod
     def Add(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a + b
 
     @staticmethod
     def Subtract(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a - b
 
     @staticmethod
     def Multiply(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a * b
 
     @staticmethod
     def Divide(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a / b
 
     @staticmethod
     def Power(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a**b
 
     @staticmethod
     def Absolute(interpreter: PyTerpreter, args: list) -> any:
-        PyTerpreterUtils.Length(args, 1)
+        PyTerpreterEnsure.Length(args, 1)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         return abs(a)
 
     Operations: dict = {
@@ -151,9 +165,9 @@ class PyTerpreterMath:
 class PyTerpreterSystem:
     @staticmethod
     def Print(interpreter: PyTerpreter, args: list) -> Illegal:
-        PyTerpreterUtils.Length(args, 1)
+        PyTerpreterEnsure.Length(args, 1)
         value: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(value)
+        PyTerpreterEnsure.NotIllegal(value)
         print(value)
         return Illegal
 
@@ -165,72 +179,72 @@ class PyTerpreterSystem:
 class PyTerpreterBoolean:
     @staticmethod
     def And(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a and b
 
     @staticmethod
     def Or(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a or b
 
     @staticmethod
     def Not(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 1)
+        PyTerpreterEnsure.Length(args, 1)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         return not a
 
     @staticmethod
     def Equal(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a == b
 
     @staticmethod
     def Less(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a < b
 
     @staticmethod
     def Greater(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a > b
 
     @staticmethod
     def LessEqual(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a <= b
 
     @staticmethod
     def GreaterEqual(interpreter: PyTerpreter, args: list) -> bool:
-        PyTerpreterUtils.Length(args, 2)
+        PyTerpreterEnsure.Length(args, 2)
         a: any = interpreter.execute(args[0])
-        PyTerpreterUtils.NotIllegal(a)
+        PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
-        PyTerpreterUtils.NotIllegal(b)
+        PyTerpreterEnsure.NotIllegal(b)
         return a >= b
 
     Operations: dict = {
@@ -243,6 +257,22 @@ class PyTerpreterBoolean:
         "lessEqual": LessEqual,
         "greaterEqual": GreaterEqual,
     }
+
+
+class PyTerpreterConditional:
+    @staticmethod
+    def If(interpreter: PyTerpreter, args: list) -> Illegal:
+        length: int = PyTerpreterEnsure.Length(args, (2, 3))
+        condition: any = interpreter.execute(args[0])
+        PyTerpreterEnsure.NotIllegal(condition)
+        program: any = args[1]
+        if length == 3 and not condition:
+            program = args[2]
+        PyTerpreterEnsure.Sequence(program)
+        interpreter.execute(program)
+        return Illegal
+
+    Operations: dict = {"if": If}
 
 
 class PyTerpreterEnvironment:
@@ -268,10 +298,10 @@ class PyTerpreterEnvironment:
     def next(self) -> PyTerpreterEnvironment | None:
         return self.__next
 
-    def setPrevious(self, previous: PyTerpreterVariable | None) -> None:
+    def setPrevious(self, previous: PyTerpreterEnvironment | None) -> None:
         self.__previous = previous
 
-    def setNext(self, next: PyTerpreterVariable | None) -> None:
+    def setNext(self, next: PyTerpreterEnvironment | None) -> None:
         self.__next = next
 
     def __insertIntoTree(self, previous: PyTerpreterEnvironment | None):
@@ -279,7 +309,7 @@ class PyTerpreterEnvironment:
         self.setNext(None)
         if self.previous is None:
             return
-        PyTerpreterUtils.Ensure(
+        PyTerpreterEnsure.Ensure(
             self.previous.next is None,
             "Illegal environment tree insertion.",
         )
@@ -293,22 +323,22 @@ class PyTerpreterEnvironment:
 
     def store(self, name: str, value: any) -> None:
         self.__notDestroyed()
-        PyTerpreterUtils.Type(name, str)
-        PyTerpreterUtils.NotIllegal(name)
-        PyTerpreterUtils.NotIllegal(value)
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        PyTerpreterEnsure.NotIllegal(value)
         self.__fields[name] = value
 
     def exists(self, name: str) -> bool:
         self.__notDestroyed()
-        PyTerpreterUtils.Type(name, str)
-        PyTerpreterUtils.NotIllegal(name)
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
         return name in self.__fields
 
     def retrieve(self, name: str) -> any:
         self.__notDestroyed()
-        PyTerpreterUtils.Type(name, str)
-        PyTerpreterUtils.NotIllegal(name)
-        PyTerpreterUtils.Includes(name, self.__fields)
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        PyTerpreterEnsure.Includes(name, self.__fields)
         return self.__fields[name]
 
     def destroy(self) -> None:
@@ -318,7 +348,7 @@ class PyTerpreterEnvironment:
         self.__fields.clear()
 
     def __removeFromTree(self):
-        PyTerpreterUtils.Ensure(
+        PyTerpreterEnsure.Ensure(
             self.next is None,
             "Illegal environment tree removal.",
         )
@@ -326,7 +356,7 @@ class PyTerpreterEnvironment:
         self.setPrevious(None)
 
     def __notDestroyed(self) -> None:
-        PyTerpreterUtils.Ensure(
+        PyTerpreterEnsure.Ensure(
             not self.__isDestroyed, "Illegal use of destroyed environment."
         )
 
@@ -339,16 +369,17 @@ class PyTerpreter:
             **PyTerpreterMath.Operations,
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
+            **PyTerpreterConditional.Operations,
         }
         self.execute(self.__load(cliArgs))
 
     def __load(self, cliArgs: list[str]) -> any:
-        PyTerpreterUtils.Length(cliArgs, 2)
+        PyTerpreterEnsure.Length(cliArgs, 2)
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
 
     def execute(self, program: any) -> any:
-        PyTerpreterUtils.NotIllegal(program)
+        PyTerpreterEnsure.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
                 self.__executeSequence(program)
@@ -366,8 +397,8 @@ class PyTerpreter:
 
     def __executeOperation(self, program: list) -> any:
         operator: str = program[0]
-        PyTerpreterUtils.Type(operator, str)
-        PyTerpreterUtils.Includes(operator, self.__operations)
+        PyTerpreterEnsure.Type(operator, str)
+        PyTerpreterEnsure.Includes(operator, self.__operations)
         return self.__operations[operator](self, program[1:])
 
 
