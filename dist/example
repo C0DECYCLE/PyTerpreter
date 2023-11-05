@@ -50,10 +50,10 @@
     ["set", "a", 4],
     ["set", "c", 4],
 
-    ["if", true , [
+    ["if", true, [
         ["print", 3]
         ]],
-    ["if", false , [
+    ["if", false, [
         ["print", 3]
         ], [
         ["print", 4]
