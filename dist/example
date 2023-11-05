@@ -1,5 +1,6 @@
 [
     ["print", "--------------------System Fundamentals----------------------"],
+
     ["print", "Hello World!"],
     ["set", "a", 2],
     ["print", ["get", "a"]],
@@ -52,19 +53,18 @@
 
     ["if", true, [
         ["print", 3]
-        ]],
+    ]],
     ["if", false, [
         ["print", 3]
-        ], [
+    ], [
         ["print", 4]
-        ]],
+    ]],
     ["if", false, [
         ["print", 3]
-        ]],
+    ]],
     ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]] , [
         ["print", 3]
-        ], [
+    ], [
         ["print", 4]
-        ]]
-
+    ]]
 ]
