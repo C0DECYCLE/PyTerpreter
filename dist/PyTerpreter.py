@@ -262,8 +262,9 @@ class PyTerpreterConditional:
     @staticmethod
     def If(Interpreter: PyTerpreter, args: list) -> Illegal:
         length = PyTerpreterUtils.Length(args, (2, 3))
-        b = Interpreter.execute(args[0])
+        b = args[0]
         PyTerpreterUtils.NotIllegal(b)
+        b = Interpreter.execute(b)
         PyTerpreterUtils.Type(b, bool)
         if b:
             ifTrue = args[1]
