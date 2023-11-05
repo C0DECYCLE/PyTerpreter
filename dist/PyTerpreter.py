@@ -45,7 +45,7 @@ class PyTerpreterUtils:
     @staticmethod
     def Sequence(value: any) -> None:
         PyTerpreterUtils.Ensure(
-            type(value) == list and type(value[0]) == list,
+            type(value) is list and type(value[0]) is list,
             f"No sequence where a sequence has to be",
         )
 
