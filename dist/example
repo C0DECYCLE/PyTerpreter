@@ -24,5 +24,23 @@
     ["print", ["less", 5, 10]],
     ["print", ["greater", 5, 10]],
     ["print", ["lessEqual", 5, 5]],
-    ["print", ["greaterEqual", 5, 10]]
+    ["print", ["greaterEqual", 5, 10]],
+
+    ["print", "\n--------------------Math Operations----------------------"],
+
+    ["set", "a", 4],
+    ["set", "b", -5],
+    ["set", "c", 2],
+    ["set", "d", 12.78],
+    ["set", "e", "foo"],
+
+    ["print", ["add", ["get", "a"], ["get", "c"]]],
+    ["set", "g", ["multiply", ["get", "d"], 5]],
+    ["print", ["get", "g"]],
+    ["print", ["multiply", ["get", "d"], 7]],    
+    ["print", ["subtract", ["get", "d"], ["get", "c"]]],
+    ["print", ["absolute", ["get", "b"]]],
+    ["print", ["divide", 10, 2]],
+    ["print", ["power", 10 , ["get", "c"]]],
+    ["print", ["add", ["get", "e"], "bar"]]
 ]

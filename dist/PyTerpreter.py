@@ -79,6 +79,11 @@ class PyTerpreterVariable:
             return bottom.retrieve(name)
         return PyTerpreterVariable.__RetrieveUpwards(name, bottom.previous)
 
+    Operations: dict = {
+        "set": Set,
+        "get": Get,
+    }
+
 
 class PyTerpreterMath:
     @staticmethod
@@ -90,6 +95,58 @@ class PyTerpreterMath:
         PyTerpreterUtils.NotIllegal(b)
         return a + b
 
+    @staticmethod
+    def Subtract(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a - b
+
+    @staticmethod
+    def Multiply(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a * b
+
+    @staticmethod
+    def Divide(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a / b
+
+    @staticmethod
+    def Power(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a**b
+
+    @staticmethod
+    def Absolute(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 1)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        return abs(a)
+
+    Operations: dict = {
+        "add": Add,
+        "subtract": Subtract,
+        "absolute": Absolute,
+        "multiply": Multiply,
+        "divide": Divide,
+        "power": Power,
+    }
+
 
 class PyTerpreterSystem:
     @staticmethod
@@ -99,6 +156,11 @@ class PyTerpreterSystem:
         PyTerpreterUtils.NotIllegal(value)
         print(value)
         return Illegal
+
+    Operations: dict = {
+        "print": Print,
+    }
+
 
 class PyTerpreterBoolean:
     @staticmethod
@@ -170,6 +232,18 @@ class PyTerpreterBoolean:
         b: any = interpreter.execute(args[1])
         PyTerpreterUtils.NotIllegal(b)
         return a >= b
+
+    Operations: dict = {
+        "and": And,
+        "or": Or,
+        "not": Not,
+        "equal": Equal,
+        "less": Less,
+        "greater": Greater,
+        "lessEqual": LessEqual,
+        "greaterEqual": GreaterEqual,
+    }
+
 
 class PyTerpreterEnvironment:
     def __init__(
@@ -260,19 +334,11 @@ class PyTerpreterEnvironment:
 class PyTerpreter:
     def __init__(self, cliArgs: list[str]) -> None:
         self.environment: PyTerpreterEnvironment = PyTerpreterEnvironment("global")
-        self.__operations: dict[str, callable] = {
-            "set": PyTerpreterVariable.Set,
-            "get": PyTerpreterVariable.Get,
-            "add": PyTerpreterMath.Add,
-            "print": PyTerpreterSystem.Print,
-            "and": PyTerpreterBoolean.And,
-            "or": PyTerpreterBoolean.Or,
-            "not": PyTerpreterBoolean.Not,
-            "equal": PyTerpreterBoolean.Equal,
-            "less": PyTerpreterBoolean.Less,
-            "greater": PyTerpreterBoolean.Greater,
-            "lessEqual": PyTerpreterBoolean.LessEqual,
-            "greaterEqual": PyTerpreterBoolean.GreaterEqual,
+        self.__operations: dict = {
+            **PyTerpreterVariable.Operations,
+            **PyTerpreterMath.Operations,
+            **PyTerpreterSystem.Operations,
+            **PyTerpreterBoolean.Operations,
         }
         self.execute(self.__load(cliArgs))
 

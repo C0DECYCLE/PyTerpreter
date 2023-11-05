@@ -12,10 +12,10 @@ Language Specification:
 		! Set operation environment top to bottom !
 	Mathematical operations:
 		- add: ["add", value, value]: value
-		- sub: ["sub", value, value]: value
-		- abs: ["abs", value]: value
+		- subtract: ["subtract", value, value]: value
+		- absolute: ["absolute", value]: value
 		- multiply: ["multiply", value, value]: value
-		- division: ["division", value, value]: value
+		- division: ["divide", value, value]: value
 		- power: ["power", value, value]: value
 	Conditionals:
 		- if: ["if", boolean, instructions, ?else instructions]: "illegal"
