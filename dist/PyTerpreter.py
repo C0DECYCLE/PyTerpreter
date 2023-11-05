@@ -90,6 +90,49 @@ class PyTerpreterMath:
         PyTerpreterUtils.NotIllegal(b)
         return a + b
 
+    @staticmethod
+    def Subtract(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a - b
+
+    @staticmethod
+    def Multiply(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a * b
+
+    @staticmethod
+    def Divide(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a / b
+
+    @staticmethod
+    def Power(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 2)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        b: any = interpreter.execute(args[1])
+        PyTerpreterUtils.NotIllegal(b)
+        return a**b
+
+    @staticmethod
+    def Absolute(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterUtils.Length(args, 1)
+        a: any = interpreter.execute(args[0])
+        PyTerpreterUtils.NotIllegal(a)
+        return abs(a)
+
 
 class PyTerpreterSystem:
     @staticmethod
@@ -99,6 +142,7 @@ class PyTerpreterSystem:
         PyTerpreterUtils.NotIllegal(value)
         print(value)
         return Illegal
+
 
 class PyTerpreterBoolean:
     @staticmethod
@@ -170,6 +214,7 @@ class PyTerpreterBoolean:
         b: any = interpreter.execute(args[1])
         PyTerpreterUtils.NotIllegal(b)
         return a >= b
+
 
 class PyTerpreterEnvironment:
     def __init__(
@@ -264,6 +309,11 @@ class PyTerpreter:
             "set": PyTerpreterVariable.Set,
             "get": PyTerpreterVariable.Get,
             "add": PyTerpreterMath.Add,
+            "subtract": PyTerpreterMath.Subtract,
+            "absolute": PyTerpreterMath.Absolute,
+            "multiply": PyTerpreterMath.Multiply,
+            "divide": PyTerpreterMath.Divide,
+            "power": PyTerpreterMath.Power,
             "print": PyTerpreterSystem.Print,
             "and": PyTerpreterBoolean.And,
             "or": PyTerpreterBoolean.Or,
