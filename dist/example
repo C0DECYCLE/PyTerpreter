@@ -50,9 +50,21 @@
     ["set", "a", 4],
     ["set", "c", 4],
 
-    ["if", true , [["print", 3]]],
-    ["if", false , [["print", 3]], [["print", 4]]],
-    ["if", false , [["print", 3]]],
-    ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]] , [["print", 3]], [["print", 4]]],
+    ["if", true , [
+        ["print", 3]
+        ]],
+    ["if", false , [
+        ["print", 3]
+        ], [
+        ["print", 4]
+        ]],
+    ["if", false, [
+        ["print", 3]
+        ]],
+    ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]] , [
+        ["print", 3]
+        ], [
+        ["print", 4]
+        ]]
 
 ]

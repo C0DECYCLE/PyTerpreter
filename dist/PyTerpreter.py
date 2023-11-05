@@ -18,7 +18,7 @@ class PyTerpreterUtils:
     @staticmethod
     def Length(value: any, should: any) -> None:
         actual: int = len(value)
-        if type(should) == tuple:
+        if type(should) is tuple:
             PyTerpreterUtils.Ensure(
                 any(actual == possibility for possibility in should),
                 f"Invalid length occurred ({actual} -> {should})",
@@ -43,7 +43,7 @@ class PyTerpreterUtils:
         )
 
     @staticmethod
-    def MustSequence(value: any) -> None:
+    def Sequence(value: any) -> None:
         PyTerpreterUtils.Ensure(
             type(value) == list and type(value[0]) == list,
             f"No sequence where a sequence has to be",
@@ -260,22 +260,21 @@ class PyTerpreterBoolean:
 
 class PyTerpreterConditional:
     @staticmethod
-    def If(Interpreter: PyTerpreter, args: list) -> Illegal:
+    def If(interpreter: PyTerpreter, args: list) -> Illegal:
         length = PyTerpreterUtils.Length(args, (2, 3))
         b = args[0]
         PyTerpreterUtils.NotIllegal(b)
-        b = Interpreter.execute(b)
-        PyTerpreterUtils.Type(b, bool)
+        b = interpreter.execute(b)
         if b:
             ifTrue = args[1]
             PyTerpreterUtils.NotIllegal(ifTrue)
-            PyTerpreterUtils.MustSequence(ifTrue)
-            Interpreter.execute(ifTrue)
+            PyTerpreterUtils.Sequence(ifTrue)
+            interpreter.execute(ifTrue)
         elif length == 3:
             ifFalse = args[2]
             PyTerpreterUtils.NotIllegal(ifFalse)
-            PyTerpreterUtils.MustSequence(ifFalse)
-            Interpreter.execute(ifFalse)
+            PyTerpreterUtils.Sequence(ifFalse)
+            interpreter.execute(ifFalse)
 
         return Illegal
 
