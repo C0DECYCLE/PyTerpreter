@@ -274,6 +274,52 @@ class PyTerpreterConditional:
 
     Operations: dict = {"if": If}
 
+class PyterpreterDictionary:
+    @staticmethod
+    # do we still take args here and check for length 0?
+    def InitializeDictionary(interpreter: PyTerpreter, args: list) -> dict:
+        PyTerpreterEnsure.Length(args, 0)
+        return {}
+
+    @staticmethod
+    def DictionarySet(interpreter: PyTerpreter, args: list) -> "Illegal":
+        PyTerpreterEnsure.Length(args, 3)
+        dictionary: dict = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(dictionary, dict)
+        key: any = interpreter.execute(args[1])
+        PyTerpreterEnsure.NotIllegal(key)
+        value: any = interpreter.execute(args[2])
+        PyTerpreterEnsure.NotIllegal(value)
+
+        dictionary[key] = value
+        return "Illegal"
+
+    @staticmethod
+    def DictionaryGet(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterEnsure.Length(args, 2)
+        dictionary: dict = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(dictionary, dict)
+        key: any = interpreter.execute(args[1])
+        PyTerpreterEnsure.NotIllegal(key)
+
+        return dictionary.get(key, None)  # Returns None if key not found
+
+    @staticmethod
+    def DictionaryMerge(interpreter: PyTerpreter, args: list) -> dict:
+        PyTerpreterEnsure.Length(args, 2)
+        dict1: dict = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(dict1, dict)
+        dict2: dict = interpreter.execute(args[1])
+        PyTerpreterEnsure.Type(dict2, dict)
+
+        return {**dict1, **dict2}
+
+    Operations: dict = {
+        "dictionary": InitializeDictionary,
+        "dictionarySet": DictionarySet,
+        "dictionaryGet": DictionaryGet,
+        "dictionaryMerge": DictionaryMerge,
+    }
 
 class PyTerpreterArray:
     @staticmethod
@@ -406,7 +452,6 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
-            **PyTerpreterArray.Operations,
         }
         self.execute(self.__load(cliArgs))
 
