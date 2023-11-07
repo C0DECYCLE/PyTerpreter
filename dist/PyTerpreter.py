@@ -320,6 +320,7 @@ class PyterpreterDictionary:
         "dictionaryMerge": DictionaryMerge,
     }
 
+
 class PyTerpreterArray:
     @staticmethod
     def Array(interpreter: PyTerpreter, args: list) -> list:
@@ -451,6 +452,7 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
+            **PyterpreterDictionary.Operations,
         }
         self.execute(self.__load(cliArgs))
 
