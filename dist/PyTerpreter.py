@@ -276,7 +276,6 @@ class PyTerpreterConditional:
 
 class PyterpreterDictionary:
     @staticmethod
-    # do we still take args here and check for length 0?
     def InitializeDictionary(interpreter: PyTerpreter, args: list) -> dict:
         PyTerpreterEnsure.Length(args, 0)
         return {}
