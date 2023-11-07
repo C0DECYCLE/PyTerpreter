@@ -143,7 +143,7 @@ class PyTerpreterMath:
         PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
         PyTerpreterEnsure.NotIllegal(b)
-        return a**b
+        return a ** b
 
     @staticmethod
     def Absolute(interpreter: PyTerpreter, args: list) -> any:
@@ -274,7 +274,8 @@ class PyTerpreterConditional:
 
     Operations: dict = {"if": If}
 
-class PyterpreterArray:
+
+class PyTerpreterArray:
     @staticmethod
     def InitializeArray(interpreter: PyTerpreter, args: list) -> list:
         PyTerpreterEnsure.Length(args, 1)
@@ -312,9 +313,10 @@ class PyterpreterArray:
         "arrayGet": ArrayGet,
     }
 
+
 class PyTerpreterEnvironment:
     def __init__(
-        self, usage: str, previous: PyTerpreterEnvironment | None = None
+            self, usage: str, previous: PyTerpreterEnvironment | None = None
     ) -> None:
         self.__usage: str = usage
         self.__previous: PyTerpreterEnvironment | None = None
@@ -407,7 +409,7 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
-            **PyterpreterArray.Operations
+            **PyTerpreterArray.Operations
         }
         self.execute(self.__load(cliArgs))
 
