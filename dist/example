@@ -78,6 +78,22 @@
 
     ["print", ["get", "a"]],
     ["print", ["arrayGet", ["get", "a"], 1]],
-    ["print", ["arrayGet", ["arrayGet", ["get", "a"], 3], 2]]
+    ["print", ["arrayGet", ["arrayGet", ["get", "a"], 3], 2]],
 
+    ["print", "\n--------------------Dictionaries----------------------"],
+
+    ["set", "a", ["dictionary"]],
+    ["set", "b", ["dictionary"]],
+    ["dictionarySet", ["get", "a"], "Name", "James"],
+    ["dictionarySet", ["get", "a"], "Age", 21],
+    ["dictionarySet", ["get", "a"], "Location", "Hogwarts"],
+    ["dictionarySet", ["get", "b"], "Name", "Geralt of Rivia"],
+    ["dictionarySet", ["get", "b"], "Age", 99],
+
+    ["print", ["get", "a"]],
+    ["print", ["get", "b"]],
+    ["print", ["dictionaryGet", ["get", "b"], "Name"]],
+    ["print", ["dictionaryGet", ["get", "a"], "Age"]],
+    ["set", "c", ["dictionaryMerge", ["get", "a"], ["get", "b"]]],
+    ["print", ["get", "c"]]
 ]
