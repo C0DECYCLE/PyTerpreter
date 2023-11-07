@@ -45,10 +45,8 @@ class PyTerpreterEnsure:
 
     @staticmethod
     def Sequence(value: any) -> None:
-        PyTerpreterEnsure.Ensure(
-            type(value) is list and type(value[0]) is list,
-            f"Missing sequence occurred.",
-        )
+        PyTerpreterEnsure.Type(value, list)
+        [PyTerpreterEnsure.Type(element, list) for element in value]
 
     @staticmethod
     def Includes(value: any, multi: any) -> None:
@@ -78,6 +76,17 @@ class PyTerpreterVariable:
         return PyTerpreterVariable.__StoreDownwards(name, value, top.next)
 
     @staticmethod
+    def LocalSet(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterEnsure.Length(args, 2)
+        name: str = args[0]
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        value: any = interpreter.execute(args[1])
+        PyTerpreterEnsure.NotIllegal(value)
+        interpreter.environment.lowest().store(name, value)
+        return Illegal
+
+    @staticmethod
     def Get(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 1)
         name: str = args[0]
@@ -95,6 +104,7 @@ class PyTerpreterVariable:
 
     Operations: dict = {
         "set": Set,
+        "localSet": LocalSet,
         "get": Get,
     }
 
@@ -265,11 +275,15 @@ class PyTerpreterConditional:
         length: int = PyTerpreterEnsure.Length(args, (2, 3))
         condition: any = interpreter.execute(args[0])
         PyTerpreterEnsure.NotIllegal(condition)
-        program: any = args[1]
-        if length == 3 and not condition:
+        # was bug here that if else was missing and bool was false still got executed
+        program: any = None
+        if condition:
+            program = args[1]
+        elif length == 3:
             program = args[2]
-        PyTerpreterEnsure.Sequence(program)
-        interpreter.execute(program)
+        if program is not None:
+            PyTerpreterEnsure.Sequence(program)
+            interpreter.execute(program, "if")
         return Illegal
 
     Operations: dict = {"if": If}
@@ -372,6 +386,57 @@ class PyTerpreterLoop:
     Operations: dict = {"while": While}
 
 
+class PyTerpreterFunction:
+    @staticmethod
+    def Function(interpreter: PyTerpreter, args: list) -> list:
+        PyTerpreterEnsure.Length(args, 2)
+        # ensure parameters
+        parameters: list[str] = args[0]
+        PyTerpreterEnsure.Type(parameters, list)
+        [PyTerpreterEnsure.Type(parameter, str) for parameter in parameters]
+        # ensure instructions
+        program: list = args[1]
+        PyTerpreterEnsure.Sequence(program)
+        return ["function", parameters, program]
+
+    @staticmethod
+    def Call(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterEnsure.Length(args, 2)
+        # fetch function and ensure
+        function: any = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(function, list)
+        PyTerpreterEnsure.Ensure(
+            function[0] == "function", "Illegal call of a non-function."
+        )
+        # ensure arguments
+        arguments: list = args[1]
+        PyTerpreterEnsure.Type(arguments, list)
+        PyTerpreterEnsure.Ensure(
+            len(arguments) == len(function[1]), "Illegal function argument missmatch."
+        )
+        # map arguments to parameters:
+        # before function exec: for each parameter set parameter to execute(argument value) in function env
+        parameters: list[str] = function[1]
+        program: list = function[2]
+        for i in range(len(parameters)):
+            value: any = interpreter.execute(arguments[i])
+            operation: list = ["localSet", parameters[i], value]
+            program.insert(0, operation)
+        # SOLVED ! problem is that if variable with same name as parameter exists above the function,
+        # this operation will write the passed argument value to the upper value,
+        # applied solution is to force that set writes the variable to the lowest env aka function env aka local env
+        # we can ignore the getting because it looks first in the lowest
+        # execute function instructions
+        interpreter.execute(program, "function")
+
+        # implement return? and pass back that value to here and return else return None
+        # return ends instructions and only allowed if env is function
+
+        return None
+
+    Operations: dict = {"function": Function, "call": Call}
+
+
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
@@ -470,6 +535,7 @@ class PyTerpreter:
             **PyterpreterDictionary.Operations,
             **PyTerpreterArray.Operations,
             **PyTerpreterLoop.Operations,
+            **PyTerpreterFunction.Operations,
         }
         self.execute(self.__load(cliArgs))
 
@@ -478,19 +544,22 @@ class PyTerpreter:
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
 
-    def execute(self, program: any) -> any:
+    def execute(self, program: any, usage: str | None = None) -> any:
         PyTerpreterEnsure.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
-                self.__executeSequence(program)
+                self.__executeSequence(program, usage)
             else:
                 return self.__executeOperation(program)
         else:
             return program
 
-    def __executeSequence(self, sequence: list) -> None:
+    def __executeSequence(self, sequence: list, usage: str | None) -> None:
+        PyTerpreterEnsure.Sequence(sequence)
         above: PyTerpreterEnvironment = self.environment.lowest()
-        environment: PyTerpreterEnvironment = PyTerpreterEnvironment("sequence", above)
+        environment: PyTerpreterEnvironment = PyTerpreterEnvironment(
+            usage or "sequence", above
+        )
         for program in sequence:
             self.execute(program)
         environment.destroy()

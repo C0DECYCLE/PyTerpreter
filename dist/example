@@ -1,5 +1,5 @@
 [
-    ["print", "--------------------System Fundamentals----------------------"],
+    ["print", "-------------------- System Fundamentals ----------------------"],
 
     ["print", "Hello World!"],
     ["set", "a", 2],
@@ -11,7 +11,7 @@
     ["set", "c", true],
     ["print", ["get", "c"]],
 
-    ["print", "\n--------------------Boolean Operations----------------------"],
+    ["print", "\n-------------------- Boolean Operations ----------------------"],
 
     ["set", "a", 4],
     ["set", "b", 5],
@@ -27,7 +27,7 @@
     ["print", ["lessEqual", 5, 5]],
     ["print", ["greaterEqual", 5, 10]],
 
-    ["print", "\n--------------------Math Operations----------------------"],
+    ["print", "\n-------------------- Math Operations ----------------------"],
 
     ["set", "a", 4],
     ["set", "b", -5],
@@ -45,8 +45,7 @@
     ["print", ["power", 10 , ["get", "c"]]],
     ["print", ["add", ["get", "e"], "bar"]],
 
-
-    ["print", "\n--------------------Conditionals----------------------"],
+    ["print", "\n-------------------- Conditionals ----------------------"],
 
     ["set", "a", 4],
     ["set", "c", 4],
@@ -62,7 +61,7 @@
     ["if", false, [
         ["print", 3]
     ]],
-    ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]] , [
+    ["if", ["not", ["equal", ["get", "a"], ["get", "c"]]], [
         ["print", 3]
     ], [
         ["print", 4]
@@ -103,6 +102,48 @@
     ["while", ["lessEqual", ["get", "a"], 5],[
         ["print", ["get", "a"]],
         ["set", "a", ["add", ["get", "a"], 1]]
-    ]]
+    ]],
 
+    ["print", "\n-------------------- Functions ----------------------"],
+
+    ["set", "greet", ["function", [], [
+        ["print", "Hello World!"],
+        ["print", "Function and Call worked!!!"]
+    ]]],
+
+    ["call", ["get", "greet"], []],
+
+    ["call", ["function", [], [
+        ["print", "anonymous function..."],
+        ["print", "...got called"],
+        ["print", "code executed instantly indirectly"]
+    ]], []],
+
+    ["set", "testParam", "iTryToFuckThingsUp"],
+
+    ["call", ["function", ["testParam"], [
+        ["print", "parameter argument test:"],
+        ["print", ["get", "testParam"]],
+        ["if", ["equal", ["get", "testParam"], "iAmAArgument"], [
+            ["print", "parameter argument worked successfully"]
+        ], [
+            ["print", "damn! parameter argument failed"]
+        ]],
+        ["if", ["equal", ["get", "testParam"], "iTryToFuckThingsUp"], [
+            ["print", "things got fucked up"]
+        ]]
+    ]], ["iAmAArgument"]],
+
+    ["print", ["get", "testParam"]],
+
+    ["set", "customAdd", ["function", ["x", "y"], [
+        ["set", "result", ["add", ["get", "x"], ["get", "y"]]],
+        ["print", "Result of customAdd is:"],
+        ["print", ["get", "result"]],
+        ["print", "Result was printed but not yet returned... also used overwritten result variable which exists above"]
+    ]]],
+
+    ["call", ["get", "customAdd"], [10, 5]],
+
+    ["print", "\nTODO: Function return."]
 ]
