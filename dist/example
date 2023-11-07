@@ -66,5 +66,18 @@
         ["print", 3]
     ], [
         ["print", 4]
-    ]]
+    ]],
+
+    ["print", "\n--------------------Arrays----------------------"],
+
+    ["set", "a", ["array", 5]],
+    ["set", "b", ["array", 3]],
+    ["arraySet", ["get", "a"], 1, "500"],
+    ["arraySet", ["get", "b"], 2, "Hello"],
+    ["arraySet", ["get", "a"], 3, ["get", "b"]],
+
+    ["print", ["get", "a"]],
+    ["print", ["arrayGet", ["get", "a"], 1]],
+    ["print", ["arrayGet", ["arrayGet", ["get", "a"], 3], 2]]
+
 ]
