@@ -276,7 +276,7 @@ class PyTerpreterConditional:
 
 class PyterpreterDictionary:
     @staticmethod
-    def InitializeDictionary(interpreter: PyTerpreter, args: list) -> dict:
+    def Dictionary(interpreter: PyTerpreter, args: list) -> dict:
         PyTerpreterEnsure.Length(args, 0)
         return {}
 
@@ -289,9 +289,8 @@ class PyterpreterDictionary:
         PyTerpreterEnsure.NotIllegal(key)
         value: any = interpreter.execute(args[2])
         PyTerpreterEnsure.NotIllegal(value)
-
         dictionary[key] = value
-        return "Illegal"
+        return Illegal
 
     @staticmethod
     def DictionaryGet(interpreter: PyTerpreter, args: list) -> any:
@@ -300,7 +299,6 @@ class PyterpreterDictionary:
         PyTerpreterEnsure.Type(dictionary, dict)
         key: any = interpreter.execute(args[1])
         PyTerpreterEnsure.NotIllegal(key)
-
         return dictionary.get(key, None)  # Returns None if key not found
 
     @staticmethod
@@ -310,11 +308,10 @@ class PyterpreterDictionary:
         PyTerpreterEnsure.Type(dict1, dict)
         dict2: dict = interpreter.execute(args[1])
         PyTerpreterEnsure.Type(dict2, dict)
-
         return {**dict1, **dict2}
 
     Operations: dict = {
-        "dictionary": InitializeDictionary,
+        "dictionary": Dictionary,
         "dictionarySet": DictionarySet,
         "dictionaryGet": DictionaryGet,
         "dictionaryMerge": DictionaryMerge,
