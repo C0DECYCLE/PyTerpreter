@@ -10,6 +10,8 @@ Language Specification:
 		- get: ["get", "name"]: value
 		! Get operation environment bottom to top !
 		! Set operation environment top to bottom !
+	System operations:
+		- print: ["print", value]: "illegal"
 	Mathematical operations:
 		- add: ["add", value, value]: value
 		- subtract: ["subtract", value, value]: value
@@ -62,5 +64,3 @@ Language Specification:
 	Object operations:
 	    - set: ["objectSet", environment, "name", value]: "illegal"
 	    - get: ["objectGet", environment, "name"]: value
-	System operations:
-		- print: ["print", value]: "illegal"

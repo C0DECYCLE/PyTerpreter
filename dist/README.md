@@ -19,3 +19,18 @@ M1:
 -  let python do the handling of operations with different types like list + list, true or dict, string == object, etc.
 - use previous and next to navigate through environment tree
 - don't use key word "seq" but instead find out ourselves, where sequence starts and ends
+
+M2:
+- array is fixed size
+- access array with special get set functions and index
+- access dictionary with special get set functions and key
+- merge dictionary with second overriding existing keys in first
+- loop implemented while with boolean condition and possible infinite runtime
+- define function stores copy of itself, call execute the copy
+- all instructions have to be sequences
+- optional return keyword for functions only 
+- return keyword ends function execution
+- return passes value back to call operation
+- function parameters get mapped one to one with argument call values
+- parameters get set by inserting set operations at the beginning of function
+- return kills fucntion environment and all children
