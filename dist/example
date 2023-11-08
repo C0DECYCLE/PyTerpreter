@@ -95,5 +95,14 @@
     ["print", ["dictionaryGet", ["get", "b"], "Name"]],
     ["print", ["dictionaryGet", ["get", "a"], "Age"]],
     ["set", "c", ["dictionaryMerge", ["get", "a"], ["get", "b"]]],
-    ["print", ["get", "c"]]
+    ["print", ["get", "c"]],
+
+    ["print", "\n--------------------Loops----------------------"],
+
+    ["set", "a", 0],
+    ["while", ["lessEqual", ["get", "a"], 5],[
+        ["print", ["get", "a"]],
+        ["set", "a", ["add", ["get", "a"], 1]]
+    ]]
+
 ]
