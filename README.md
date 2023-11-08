@@ -6,7 +6,7 @@ A interpreter founded during the UZH software construction module.
 **Branch:** "category-type-branchname" <br>
 **Commit:** "CATEGORY-TYPE: Commit message" <br>
 
-**Categories:** "DOCUMENTATION", "INTERPRETER", "EXAMPLE" <br>
+**Categories:** "DOCUMENTATION", "INTERPRETER", "TRACING", "EXAMPLE" <br>
 **Types:** "FEATURE", "BUGFIX" <br>
 
 **Issue summary:** Standard english sentence casing. <br>
