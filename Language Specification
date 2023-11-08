@@ -38,6 +38,7 @@ Language Specification:
 		! Return only allowed when environment usage is function !
 	Loops:
 		- while: ["while", boolean, instructions]: "illegal"
+		- repeat: ["repeat", int, instructions]: "illegal"
 	Array:
 		- array: ["array", size]: list
 	Array operations:
