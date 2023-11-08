@@ -97,9 +97,17 @@
     ["print", ["get", "c"]],
 
     ["print", "\n-------------------- Loops ----------------------"],
-
+    
+    ["print", "while:"],
     ["set", "a", 0],
     ["while", ["lessEqual", ["get", "a"], 5], [
+        ["print", ["get", "a"]],
+        ["set", "a", ["add", ["get", "a"], 1]]
+    ]],
+
+    ["print", "repeat:"],
+    ["set", "a", 0],
+    ["repeat", 5, [
         ["print", ["get", "a"]],
         ["set", "a", ["add", ["get", "a"], 1]]
     ]],
@@ -148,7 +156,20 @@
         ["set", "iiiii", 0],
         ["while", ["less", ["get", "iiiii"], 5], [
             ["if", ["equal", ["get", "iiiii"], 2], [
-                ["return", "correct"]
+                ["return", "correct while"]
+            ]],
+            ["set", "iiiii", ["add", ["get", "iiiii"], 1]]
+        ]],
+        ["return", "wrong"]
+    ]]],
+
+    ["print", ["call", ["get", "customFuckUp"], []]],
+
+    ["set", "customFuckUp", ["function", [], [
+        ["set", "iiiii", 0],
+        ["repeat", 6, [
+            ["if", ["equal", ["get", "iiiii"], 2], [
+                ["return", "correct repeat"]
             ]],
             ["set", "iiiii", ["add", ["get", "iiiii"], 1]]
         ]],

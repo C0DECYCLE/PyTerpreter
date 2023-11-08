@@ -381,7 +381,20 @@ class PyTerpreterLoop:
         PyTerpreterEnsure.NotIllegal(condition)
         return condition
 
-    Operations: dict = {"while": While}
+    @staticmethod
+    def Repeat(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterEnsure.Length(args, 2)
+        count: int = args[0]
+        PyTerpreterEnsure.Type(count, int)
+        program: any = args[1]
+        PyTerpreterEnsure.Sequence(program)
+        for _ in range(count):
+            if interpreter.environment.lowest().kill:
+                break
+            interpreter.execute(program, "repeat")
+        return Illegal
+
+    Operations: dict = {"while": While, "repeat": Repeat}
 
 
 class PyTerpreterFunction:
