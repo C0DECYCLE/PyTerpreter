@@ -143,7 +143,7 @@ class PyTerpreterMath:
         PyTerpreterEnsure.NotIllegal(a)
         b: any = interpreter.execute(args[1])
         PyTerpreterEnsure.NotIllegal(b)
-        return a ** b
+        return a**b
 
     @staticmethod
     def Absolute(interpreter: PyTerpreter, args: list) -> any:
@@ -277,12 +277,11 @@ class PyTerpreterConditional:
 
 class PyTerpreterArray:
     @staticmethod
-    def InitializeArray(interpreter: PyTerpreter, args: list) -> list:
+    def Array(interpreter: PyTerpreter, args: list) -> list:
         PyTerpreterEnsure.Length(args, 1)
         size: int = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(size, int)
-        array: list = [None] * size
-        return array
+        return [None] * size
 
     @staticmethod
     def ArraySet(interpreter: PyTerpreter, args: list) -> "Illegal":
@@ -293,9 +292,8 @@ class PyTerpreterArray:
         PyTerpreterEnsure.Type(index, int)
         value: any = interpreter.execute(args[2])
         PyTerpreterEnsure.NotIllegal(value)
-
         array[index] = value
-        return "Illegal"
+        return Illegal
 
     @staticmethod
     def ArrayGet(interpreter: PyTerpreter, args: list) -> any:
@@ -304,11 +302,10 @@ class PyTerpreterArray:
         PyTerpreterEnsure.Type(array, list)
         index: int = interpreter.execute(args[1])
         PyTerpreterEnsure.Type(index, int)
-
         return array[index]
 
     Operations: dict = {
-        "array": InitializeArray,
+        "array": Array,
         "arraySet": ArraySet,
         "arrayGet": ArrayGet,
     }
@@ -316,7 +313,7 @@ class PyTerpreterArray:
 
 class PyTerpreterEnvironment:
     def __init__(
-            self, usage: str, previous: PyTerpreterEnvironment | None = None
+        self, usage: str, previous: PyTerpreterEnvironment | None = None
     ) -> None:
         self.__usage: str = usage
         self.__previous: PyTerpreterEnvironment | None = None
@@ -409,7 +406,7 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
-            **PyTerpreterArray.Operations
+            **PyTerpreterArray.Operations,
         }
         self.execute(self.__load(cliArgs))
 
