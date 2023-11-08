@@ -97,12 +97,14 @@
     ["print", ["get", "c"]],
 
     ["print", "\n-------------------- Loops ----------------------"],
+    
     ["print", "while:"],
     ["set", "a", 0],
     ["while", ["lessEqual", ["get", "a"], 5], [
         ["print", ["get", "a"]],
         ["set", "a", ["add", ["get", "a"], 1]]
     ]],
+
     ["print", "repeat:"],
     ["set", "a", 0],
     ["repeat", 5, [
