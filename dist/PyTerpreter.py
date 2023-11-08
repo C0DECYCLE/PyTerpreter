@@ -355,6 +355,23 @@ class PyTerpreterArray:
     }
 
 
+class PyTerpreterLoop:
+    def __Condition(interpreter: PyTerpreter, arg: any) -> any:
+        condition: any = interpreter.execute(arg)
+        PyTerpreterEnsure.NotIllegal(condition)
+        return condition
+
+    def While(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterEnsure.Length(args, 2)
+        program: any = args[1]
+        PyTerpreterEnsure.Sequence(program)
+        while PyTerpreterLoop.__Condition(interpreter, args[0]):
+            interpreter.execute(program)
+        return Illegal
+
+    Operations: dict = {"while": While}
+
+
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
@@ -452,6 +469,7 @@ class PyTerpreter:
             **PyTerpreterConditional.Operations,
             **PyterpreterDictionary.Operations,
             **PyTerpreterArray.Operations,
+            **PyTerpreterLoop.Operations,
         }
         self.execute(self.__load(cliArgs))
 
