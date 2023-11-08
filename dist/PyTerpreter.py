@@ -274,6 +274,7 @@ class PyTerpreterConditional:
 
     Operations: dict = {"if": If}
 
+
 class PyterpreterDictionary:
     @staticmethod
     def Dictionary(interpreter: PyTerpreter, args: list) -> dict:
@@ -450,6 +451,7 @@ class PyTerpreter:
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
             **PyterpreterDictionary.Operations,
+            **PyTerpreterArray.Operations,
         }
         self.execute(self.__load(cliArgs))
 
