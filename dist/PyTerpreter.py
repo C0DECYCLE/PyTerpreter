@@ -54,6 +54,13 @@ class PyTerpreterEnsure:
             value in multi, f"Non-existent property occurred ({value} -> {multi})."
         )
 
+    @staticmethod
+    def Usage(environment: PyTerpreterEnvironment, value: str) -> None:
+        PyTerpreterEnsure.Ensure(
+            environment.usage == value,
+            f"Illegal environment usage occurred ({value} -> {environment.usage}).",
+        )
+
 
 class PyTerpreterVariable:
     @staticmethod
@@ -76,17 +83,6 @@ class PyTerpreterVariable:
         return PyTerpreterVariable.__StoreDownwards(name, value, top.next)
 
     @staticmethod
-    def LocalSet(interpreter: PyTerpreter, args: list) -> Illegal:
-        PyTerpreterEnsure.Length(args, 2)
-        name: str = args[0]
-        PyTerpreterEnsure.Type(name, str)
-        PyTerpreterEnsure.NotIllegal(name)
-        value: any = interpreter.execute(args[1])
-        PyTerpreterEnsure.NotIllegal(value)
-        interpreter.environment.lowest().store(name, value)
-        return Illegal
-
-    @staticmethod
     def Get(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 1)
         name: str = args[0]
@@ -104,7 +100,6 @@ class PyTerpreterVariable:
 
     Operations: dict = {
         "set": Set,
-        "localSet": LocalSet,
         "get": Get,
     }
 
@@ -275,7 +270,6 @@ class PyTerpreterConditional:
         length: int = PyTerpreterEnsure.Length(args, (2, 3))
         condition: any = interpreter.execute(args[0])
         PyTerpreterEnsure.NotIllegal(condition)
-        # was bug here that if else was missing and bool was false still got executed
         program: any = None
         if condition:
             program = args[1]
@@ -370,18 +364,22 @@ class PyTerpreterArray:
 
 
 class PyTerpreterLoop:
-    def __Condition(interpreter: PyTerpreter, arg: any) -> any:
-        condition: any = interpreter.execute(arg)
-        PyTerpreterEnsure.NotIllegal(condition)
-        return condition
-
+    @staticmethod
     def While(interpreter: PyTerpreter, args: list) -> Illegal:
         PyTerpreterEnsure.Length(args, 2)
         program: any = args[1]
         PyTerpreterEnsure.Sequence(program)
         while PyTerpreterLoop.__Condition(interpreter, args[0]):
-            interpreter.execute(program)
+            if interpreter.environment.lowest().kill:
+                break
+            interpreter.execute(program, "while")
         return Illegal
+
+    @staticmethod
+    def __Condition(interpreter: PyTerpreter, arg: any) -> any:
+        condition: any = interpreter.execute(arg)
+        PyTerpreterEnsure.NotIllegal(condition)
+        return condition
 
     Operations: dict = {"while": While}
 
@@ -390,11 +388,9 @@ class PyTerpreterFunction:
     @staticmethod
     def Function(interpreter: PyTerpreter, args: list) -> list:
         PyTerpreterEnsure.Length(args, 2)
-        # ensure parameters
         parameters: list[str] = args[0]
         PyTerpreterEnsure.Type(parameters, list)
         [PyTerpreterEnsure.Type(parameter, str) for parameter in parameters]
-        # ensure instructions
         program: list = args[1]
         PyTerpreterEnsure.Sequence(program)
         return ["function", parameters, program]
@@ -402,39 +398,49 @@ class PyTerpreterFunction:
     @staticmethod
     def Call(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 2)
-        # fetch function and ensure
         function: any = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(function, list)
         PyTerpreterEnsure.Ensure(
             function[0] == "function", "Illegal call of a non-function."
         )
-        # ensure arguments
         arguments: list = args[1]
         PyTerpreterEnsure.Type(arguments, list)
         PyTerpreterEnsure.Ensure(
             len(arguments) == len(function[1]), "Illegal function argument missmatch."
         )
-        # map arguments to parameters:
-        # before function exec: for each parameter set parameter to execute(argument value) in function env
         parameters: list[str] = function[1]
         program: list = function[2]
         for i in range(len(parameters)):
             value: any = interpreter.execute(arguments[i])
-            operation: list = ["localSet", parameters[i], value]
+            operation: list = ["set", parameters[i], value]
             program.insert(0, operation)
-        # SOLVED ! problem is that if variable with same name as parameter exists above the function,
-        # this operation will write the passed argument value to the upper value,
-        # applied solution is to force that set writes the variable to the lowest env aka function env aka local env
-        # we can ignore the getting because it looks first in the lowest
-        # execute function instructions
-        interpreter.execute(program, "function")
+        return interpreter.execute(program, "function")
 
-        # implement return? and pass back that value to here and return else return None
-        # return ends instructions and only allowed if env is function
+    @staticmethod
+    def Return(interpreter: PyTerpreter, args: list) -> Illegal:
+        environment: PyTerpreterEnvironment = (
+            PyTerpreterFunction.__FetchFunctionEnvironment(
+                interpreter.environment.lowest()
+            )
+        )
+        PyTerpreterEnsure.Length(args, 1)
+        value: any = interpreter.execute(args[0])
+        PyTerpreterEnsure.NotIllegal(value)
+        environment.store("return", value)
+        environment.determinate()
 
-        return None
+    @staticmethod
+    def __FetchFunctionEnvironment(
+        environment: PyTerpreterEnvironment,
+    ) -> PyTerpreterEnvironment:
+        if environment.usage == "function":
+            return environment
+        PyTerpreterEnsure.Ensure(
+            environment.previous is not None, f"Illegal use of return outside function."
+        )
+        return PyTerpreterFunction.__FetchFunctionEnvironment(environment.previous)
 
-    Operations: dict = {"function": Function, "call": Call}
+    Operations: dict = {"function": Function, "call": Call, "return": Return}
 
 
 class PyTerpreterEnvironment:
@@ -445,6 +451,7 @@ class PyTerpreterEnvironment:
         self.__previous: PyTerpreterEnvironment | None = None
         self.__next: PyTerpreterEnvironment | None = None
         self.__fields: dict = {}
+        self.__kill: bool = False
         self.__isDestroyed: bool = False
         self.__insertIntoTree(previous)
 
@@ -459,6 +466,10 @@ class PyTerpreterEnvironment:
     @property
     def next(self) -> PyTerpreterEnvironment | None:
         return self.__next
+
+    @property
+    def kill(self) -> bool:
+        return self.__kill
 
     def setPrevious(self, previous: PyTerpreterEnvironment | None) -> None:
         self.__previous = previous
@@ -503,9 +514,16 @@ class PyTerpreterEnvironment:
         PyTerpreterEnsure.Includes(name, self.__fields)
         return self.__fields[name]
 
+    def determinate(self) -> None:
+        self.__notDestroyed()
+        self.__kill = True
+        if self.next is not None:
+            self.next.determinate()
+
     def destroy(self) -> None:
         self.__notDestroyed()
         self.__isDestroyed = True
+        self.__kill = True
         self.__removeFromTree()
         self.__fields.clear()
 
@@ -548,21 +566,27 @@ class PyTerpreter:
         PyTerpreterEnsure.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
-                self.__executeSequence(program, usage)
+                return self.__executeSequence(program, usage)
             else:
                 return self.__executeOperation(program)
         else:
             return program
 
-    def __executeSequence(self, sequence: list, usage: str | None) -> None:
+    def __executeSequence(self, sequence: list, usage: str | None) -> any:
         PyTerpreterEnsure.Sequence(sequence)
         above: PyTerpreterEnvironment = self.environment.lowest()
         environment: PyTerpreterEnvironment = PyTerpreterEnvironment(
             usage or "sequence", above
         )
         for program in sequence:
+            if environment.kill:
+                break
             self.execute(program)
+        returnValue: any = None
+        if usage == "function" and environment.exists("return"):
+            returnValue = environment.retrieve("return")
         environment.destroy()
+        return returnValue
 
     def __executeOperation(self, program: list) -> any:
         operator: str = program[0]

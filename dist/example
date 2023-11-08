@@ -67,7 +67,7 @@
         ["print", 4]
     ]],
 
-    ["print", "\n--------------------Arrays----------------------"],
+    ["print", "\n-------------------- Arrays ----------------------"],
 
     ["set", "a", ["array", 5]],
     ["set", "b", ["array", 3]],
@@ -79,7 +79,7 @@
     ["print", ["arrayGet", ["get", "a"], 1]],
     ["print", ["arrayGet", ["arrayGet", ["get", "a"], 3], 2]],
 
-    ["print", "\n--------------------Dictionaries----------------------"],
+    ["print", "\n-------------------- Dictionaries ----------------------"],
 
     ["set", "a", ["dictionary"]],
     ["set", "b", ["dictionary"]],
@@ -96,10 +96,10 @@
     ["set", "c", ["dictionaryMerge", ["get", "a"], ["get", "b"]]],
     ["print", ["get", "c"]],
 
-    ["print", "\n--------------------Loops----------------------"],
+    ["print", "\n-------------------- Loops ----------------------"],
 
     ["set", "a", 0],
-    ["while", ["lessEqual", ["get", "a"], 5],[
+    ["while", ["lessEqual", ["get", "a"], 5], [
         ["print", ["get", "a"]],
         ["set", "a", ["add", ["get", "a"], 1]]
     ]],
@@ -138,12 +138,22 @@
 
     ["set", "customAdd", ["function", ["x", "y"], [
         ["set", "result", ["add", ["get", "x"], ["get", "y"]]],
-        ["print", "Result of customAdd is:"],
-        ["print", ["get", "result"]],
-        ["print", "Result was printed but not yet returned... also used overwritten result variable which exists above"]
+        ["return", ["get", "result"]],
+        ["return", "wrong return"]
     ]]],
 
-    ["call", ["get", "customAdd"], [10, 5]],
+    ["print", ["call", ["get", "customAdd"], [10, 5]]],
 
-    ["print", "\nTODO: Function return."]
+    ["set", "customFuckUp", ["function", [], [
+        ["set", "iiiii", 0],
+        ["while", ["less", ["get", "iiiii"], 5], [
+            ["if", ["equal", ["get", "iiiii"], 2], [
+                ["return", "correct"]
+            ]],
+            ["set", "iiiii", ["add", ["get", "iiiii"], 1]]
+        ]],
+        ["return", "wrong"]
+    ]]],
+
+    ["print", ["call", ["get", "customFuckUp"], []]]
 ]
