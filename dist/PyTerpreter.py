@@ -275,6 +275,42 @@ class PyTerpreterConditional:
     Operations: dict = {"if": If}
 
 
+class PyTerpreterArray:
+    @staticmethod
+    def Array(interpreter: PyTerpreter, args: list) -> list:
+        PyTerpreterEnsure.Length(args, 1)
+        size: int = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(size, int)
+        return [None] * size
+
+    @staticmethod
+    def ArraySet(interpreter: PyTerpreter, args: list) -> "Illegal":
+        PyTerpreterEnsure.Length(args, 3)
+        array: list = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(array, list)
+        index: int = interpreter.execute(args[1])
+        PyTerpreterEnsure.Type(index, int)
+        value: any = interpreter.execute(args[2])
+        PyTerpreterEnsure.NotIllegal(value)
+        array[index] = value
+        return Illegal
+
+    @staticmethod
+    def ArrayGet(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterEnsure.Length(args, 2)
+        array: list = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(array, list)
+        index: int = interpreter.execute(args[1])
+        PyTerpreterEnsure.Type(index, int)
+        return array[index]
+
+    Operations: dict = {
+        "array": Array,
+        "arraySet": ArraySet,
+        "arrayGet": ArrayGet,
+    }
+
+
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
@@ -370,6 +406,7 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
+            **PyTerpreterArray.Operations,
         }
         self.execute(self.__load(cliArgs))
 
