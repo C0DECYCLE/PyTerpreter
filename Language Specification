@@ -57,7 +57,6 @@ Language Specification:
 	    ! Inheritance is entire class definition !
 	Class operations:
 	    - inherit: ["inherit", "function"]: ["function", "parameter"[], instructions]
-	    ! One and only one constructor !
 	    ! When inherited instructions get merged and overwritten ones get cached !
 	    ! Inherit operation fetches from cache !
 	Object:

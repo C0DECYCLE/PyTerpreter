@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import sys
+from copy import deepcopy
 
 Illegal = "illegal"
 
@@ -61,12 +62,33 @@ class PyTerpreterEnsure:
             f"Illegal environment usage occurred ({value} -> {environment.usage}).",
         )
 
+    @staticmethod
+    def Operation(value: any, should: str) -> None:
+        PyTerpreterEnsure.Type(value, list)
+        actual: str = value[0]
+        PyTerpreterEnsure.Type(actual, str)
+        PyTerpreterEnsure.Ensure(
+            actual == should, f"Illegal operation mismatch ({actual} -> {should})."
+        )
+
+    @staticmethod
+    def Class(value: any) -> None:
+        PyTerpreterEnsure.Sequence(value)
+        [PyTerpreterEnsure.Operation(operation, "set") for operation in value]
+
+    @staticmethod
+    def Instance(value: any, should: any) -> None:
+        PyTerpreterEnsure.Ensure(
+            isinstance(value, should),
+            f"Invalid type occurred ({type(value).__name__} -> {should.__name__}).",
+        )
+
 
 class PyTerpreterVariable:
     @staticmethod
     def Set(interpreter: PyTerpreter, args: list) -> Illegal:
         PyTerpreterEnsure.Length(args, 2)
-        name: str = args[0]
+        name: str = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(name, str)
         PyTerpreterEnsure.NotIllegal(name)
         value: any = interpreter.execute(args[1])
@@ -85,7 +107,7 @@ class PyTerpreterVariable:
     @staticmethod
     def Get(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 1)
-        name: str = args[0]
+        name: str = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(name, str)
         PyTerpreterEnsure.NotIllegal(name)
         return PyTerpreterVariable.__RetrieveUpwards(
@@ -174,6 +196,8 @@ class PyTerpreterSystem:
         value: any = interpreter.execute(args[0])
         PyTerpreterEnsure.NotIllegal(value)
         print(value)
+        if value == "STOP":
+            pass
         return Illegal
 
     Operations: dict = {
@@ -283,14 +307,14 @@ class PyTerpreterConditional:
     Operations: dict = {"if": If}
 
 
-class PyterpreterDictionary:
+class PyTerpreterDictionary:
     @staticmethod
     def Dictionary(interpreter: PyTerpreter, args: list) -> dict:
         PyTerpreterEnsure.Length(args, 0)
         return {}
 
     @staticmethod
-    def DictionarySet(interpreter: PyTerpreter, args: list) -> "Illegal":
+    def DictionarySet(interpreter: PyTerpreter, args: list) -> Illegal:
         PyTerpreterEnsure.Length(args, 3)
         dictionary: dict = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(dictionary, dict)
@@ -336,7 +360,7 @@ class PyTerpreterArray:
         return [None] * size
 
     @staticmethod
-    def ArraySet(interpreter: PyTerpreter, args: list) -> "Illegal":
+    def ArraySet(interpreter: PyTerpreter, args: list) -> Illegal:
         PyTerpreterEnsure.Length(args, 3)
         array: list = interpreter.execute(args[0])
         PyTerpreterEnsure.Type(array, list)
@@ -411,23 +435,26 @@ class PyTerpreterFunction:
     @staticmethod
     def Call(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 2)
-        function: any = interpreter.execute(args[0])
-        PyTerpreterEnsure.Type(function, list)
-        PyTerpreterEnsure.Ensure(
-            function[0] == "function", "Illegal call of a non-function."
-        )
+        function: list = deepcopy(interpreter.execute(args[0]))
+        PyTerpreterEnsure.Operation(function, "function")
         arguments: list = args[1]
         PyTerpreterEnsure.Type(arguments, list)
-        PyTerpreterEnsure.Ensure(
-            len(arguments) == len(function[1]), "Illegal function argument missmatch."
-        )
+        PyTerpreterFunction.InjectArguments(interpreter, function, arguments)
+        return interpreter.execute(function[2], "function")
+
+    @staticmethod
+    def InjectArguments(
+        interpreter: PyTerpreter, function: list, arguments: list
+    ) -> None:
         parameters: list[str] = function[1]
+        PyTerpreterEnsure.Ensure(
+            len(arguments) == len(parameters), "Illegal parameter argument missmatch."
+        )
         program: list = function[2]
         for i in range(len(parameters)):
             value: any = interpreter.execute(arguments[i])
             operation: list = ["set", parameters[i], value]
             program.insert(0, operation)
-        return interpreter.execute(program, "function")
 
     @staticmethod
     def Return(interpreter: PyTerpreter, args: list) -> Illegal:
@@ -440,7 +467,7 @@ class PyTerpreterFunction:
         value: any = interpreter.execute(args[0])
         PyTerpreterEnsure.NotIllegal(value)
         environment.store("return", value)
-        environment.determinate()
+        environment.terminate()
 
     @staticmethod
     def __FetchFunctionEnvironment(
@@ -456,6 +483,80 @@ class PyTerpreterFunction:
     Operations: dict = {"function": Function, "call": Call, "return": Return}
 
 
+class PyTerpreterClass:
+    @staticmethod
+    def Class(interpreter: PyTerpreter, args: list) -> list:
+        length: int = PyTerpreterEnsure.Length(args, (1, 2))
+        program: list = args[-1]
+        PyTerpreterEnsure.Class(program)
+        if length == 2:
+            inheritor: list = args[0]
+            PyTerpreterEnsure.Type(inheritor, list)
+            return ["class", inheritor, program]
+        return ["class", program]
+
+    @staticmethod
+    def Inherit(interpreter: PyTerpreter, args: list) -> list:
+        pass
+
+    Operations: dict = {"class": Class, "inherit": Inherit}
+
+
+class PyTerpreterObject:
+    @staticmethod
+    def Object(interpreter: PyTerpreter, args: list) -> PyTerpreterEnvironment:
+        PyTerpreterEnsure.Length(args, 2)
+        instantiate: list = interpreter.execute(args[0])
+        PyTerpreterEnsure.Operation(instantiate, "class")
+        program: list = deepcopy(instantiate[-1])
+        PyTerpreterEnsure.Class(program)
+        arguments: list = args[1]
+        PyTerpreterEnsure.Type(arguments, list)
+        constructor: list | None = PyTerpreterObject.__GetConstructor(program)
+        if constructor is not None:
+            PyTerpreterFunction.InjectArguments(interpreter, constructor, arguments)
+        return interpreter.execute(program, "object", True)
+
+    @staticmethod
+    def __GetConstructor(program: list) -> list | None:
+        PyTerpreterEnsure.Class(program)
+        constructor: list | None = None
+        for operation in program:
+            if operation[1] == "constructor":
+                constructor = operation[2]
+                PyTerpreterEnsure.Operation(constructor, "function")
+        return constructor
+
+    @staticmethod
+    def ObjectSet(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterEnsure.Length(args, 3)
+        environment: PyTerpreterEnvironment = interpreter.execute(args[0])
+        PyTerpreterEnsure.Instance(environment, PyTerpreterEnvironment)
+        name: str = interpreter.execute(args[1])
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        value: any = interpreter.execute(args[2])
+        PyTerpreterEnsure.NotIllegal(value)
+        environment.store(name, value)
+        return Illegal
+
+    @staticmethod
+    def ObjectGet(interpreter: PyTerpreter, args: list) -> any:
+        PyTerpreterEnsure.Length(args, 2)
+        environment: PyTerpreterEnvironment = interpreter.execute(args[0])
+        PyTerpreterEnsure.Instance(environment, PyTerpreterEnvironment)
+        name: str = interpreter.execute(args[1])
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        return environment.retrieve(name)
+
+    Operations: dict = {
+        "object": Object,
+        "objectSet": ObjectSet,
+        "objectGet": ObjectGet,
+    }
+
+
 class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
@@ -466,33 +567,39 @@ class PyTerpreterEnvironment:
         self.__fields: dict = {}
         self.__kill: bool = False
         self.__isDestroyed: bool = False
-        self.__insertIntoTree(previous)
+        self.attach(previous)
 
     @property
     def usage(self) -> str:
+        self.__notDestroyed()
         return self.__usage
 
     @property
     def previous(self) -> PyTerpreterEnvironment | None:
+        self.__notDestroyed()
         return self.__previous
 
     @property
     def next(self) -> PyTerpreterEnvironment | None:
+        self.__notDestroyed()
         return self.__next
 
     @property
     def kill(self) -> bool:
+        self.__notDestroyed()
         return self.__kill
 
     def setPrevious(self, previous: PyTerpreterEnvironment | None) -> None:
+        self.__notDestroyed()
         self.__previous = previous
 
     def setNext(self, next: PyTerpreterEnvironment | None) -> None:
+        self.__notDestroyed()
         self.__next = next
 
-    def __insertIntoTree(self, previous: PyTerpreterEnvironment | None):
+    def attach(self, previous: PyTerpreterEnvironment | None):
+        self.__notDestroyed()
         self.setPrevious(previous)
-        self.setNext(None)
         if self.previous is None:
             return
         PyTerpreterEnsure.Ensure(
@@ -527,26 +634,32 @@ class PyTerpreterEnvironment:
         PyTerpreterEnsure.Includes(name, self.__fields)
         return self.__fields[name]
 
-    def determinate(self) -> None:
+    def detach(self) -> None:
+        self.__notDestroyed()
+        self.previous.setNext(None)
+        self.setPrevious(None)
+
+    def terminate(self) -> None:
         self.__notDestroyed()
         self.__kill = True
         if self.next is not None:
-            self.next.determinate()
+            self.next.terminate()
 
     def destroy(self) -> None:
         self.__notDestroyed()
-        self.__isDestroyed = True
-        self.__kill = True
-        self.__removeFromTree()
-        self.__fields.clear()
-
-    def __removeFromTree(self):
+        self.detach()
         PyTerpreterEnsure.Ensure(
             self.next is None,
             "Illegal environment tree removal.",
         )
-        self.previous.setNext(None)
-        self.setPrevious(None)
+        # self.terminate()
+        # if self.next is not None:
+        #     self.next.destroy()
+        self.__isDestroyed = True
+        for value in self.__fields.values():
+            if isinstance(value, PyTerpreterEnvironment):
+                value.destroy()
+        self.__fields.clear()
 
     def __notDestroyed(self) -> None:
         PyTerpreterEnsure.Ensure(
@@ -563,10 +676,12 @@ class PyTerpreter:
             **PyTerpreterSystem.Operations,
             **PyTerpreterBoolean.Operations,
             **PyTerpreterConditional.Operations,
-            **PyterpreterDictionary.Operations,
+            **PyTerpreterDictionary.Operations,
             **PyTerpreterArray.Operations,
             **PyTerpreterLoop.Operations,
             **PyTerpreterFunction.Operations,
+            **PyTerpreterClass.Operations,
+            **PyTerpreterObject.Operations,
         }
         self.execute(self.__load(cliArgs))
 
@@ -575,17 +690,21 @@ class PyTerpreter:
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
 
-    def execute(self, program: any, usage: str | None = None) -> any:
+    def execute(
+        self, program: any, usage: str | None = None, preserve: bool = False
+    ) -> any:
         PyTerpreterEnsure.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
-                return self.__executeSequence(program, usage)
+                return self.__executeSequence(program, usage, preserve)
             else:
                 return self.__executeOperation(program)
         else:
             return program
 
-    def __executeSequence(self, sequence: list, usage: str | None) -> any:
+    def __executeSequence(
+        self, sequence: list, usage: str | None, preserve: bool
+    ) -> any:
         PyTerpreterEnsure.Sequence(sequence)
         above: PyTerpreterEnvironment = self.environment.lowest()
         environment: PyTerpreterEnvironment = PyTerpreterEnvironment(
@@ -595,6 +714,9 @@ class PyTerpreter:
             if environment.kill:
                 break
             self.execute(program)
+        if preserve:
+            environment.detach()
+            return environment
         returnValue: any = None
         if usage == "function" and environment.exists("return"):
             returnValue = environment.retrieve("return")

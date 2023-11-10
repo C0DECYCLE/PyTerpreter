@@ -176,5 +176,32 @@
         ["return", "wrong"]
     ]]],
 
-    ["print", ["call", ["get", "customFuckUp"], []]]
+    ["print", ["call", ["get", "customFuckUp"], []]],
+
+    ["print", "\n-------------------- Class Object ----------------------"],
+
+    ["set", "Foo", ["class", [
+        ["set", "aa", 3],
+        ["set", "add", ["function", ["bb"], [
+            ["return", ["add", ["get", "aa"], ["get", "bb"]]]
+        ]]]
+    ]]],
+    ["set", "testFoo", ["object", ["get", "Foo"], []]],
+
+    ["print", ["objectGet", ["get", "testFoo"], "aa"]],
+
+    ["print", "STOP"],
+
+    ["print", ["call", ["objectGet", ["get", "testFoo"], "add"], [7]]],
+
+
+    ["set", "Bar", ["class", [
+        ["set", "hello", "hello"],
+        ["set", "constructor", ["function", ["name"], [
+            ["print", ["add", ["get", "hello"], ["get", "name"]]]
+        ]]],
+        ["set", "something", ["function", [], [
+            ["print", "something!"]
+        ]]]
+    ]]]
 ]
