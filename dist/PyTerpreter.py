@@ -738,6 +738,8 @@ class PyTerpreterEnvironment:
 
     def attach(self, previous: PyTerpreterEnvironment | None):
         self.__notDestroyed()
+        if self.previous is not None:
+            return
         self.setPrevious(previous)
         if self.previous is None:
             return
