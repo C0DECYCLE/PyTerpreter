@@ -31,7 +31,6 @@ the PyTerpreter language. This structure improves code organization and readabil
 environment that already has that variable name. If no previous variable value is found, the variable with the value
 is stored in the current leaf environment. 
 This ensures correct updating and "placement" of a variable, so it is in the right scope.
-<br />!!! Explanation here maybe for Function difference, maybe also object? !!!
 
 - Get Operation Behavior: The "get" operation retrieves variables in the opposite, from the current environment up
 the tree until root. Once more this ensures the right scope when getting a variable, picking the "closest" environment
@@ -75,12 +74,15 @@ like list + list, true or dict, string == object, etc.
 ### Arrays
 - Array is Fixed Size: Arrays in PyTerpreter have a fixed size.
 - Array Access: Access arrays using special get and set functions along with an index.
+
 ### Dictionaries
 - Access: Use special get and set functions along with a key to access dictionaries.
 - Merge: Merge dictionaries with the second dictionary overriding existing keys in the first.
+
 ### Loops
 - Implementation: Implements a "while" loop with a boolean condition and the possibility of infinite runtime.
 - Repeat Loop: An additional repeat loop acts like a "for" loop, specifying how many times to repeat.
+
 ### Functions
 - Definition: Defines functions, storing a copy of themselves, and calls execute on the copy.
 All instructions must be sequences.
@@ -90,8 +92,22 @@ All instructions must be sequences.
 a value back to the call operation.
 - Environment Closure: "Return" kills the function environment and all its children.
 
+### Classes
+- Inheritance as Entire Class Definition: Inheritance in PyTerpreter involves inheriting the entire class definition. This means that when a class inherits from another, it includes all the instructions, functions, and properties of the parent class.
+- Instructions as Sequences of Sets: Classes in PyTerpreter consist of instructions, which are sequences of sets. These sets define the behavior of the class, including variable assignments, operations, and control flow.
+- Utilizing Inheritance for Function Fetching: Inheritance allows classes to fetch overwritten functions from their parent classes. This ensures that the class hierarchy is respected, and overridden functions can be accessed when needed.
+- Merging and Overwriting Cached Instructions: When a class inherits from another, the instructions of both classes are merged. If there are overlapping instructions, the ones in the inheriting class overwrite those in the parent class. This ensures that the most specific instructions are used.
+- Handling Multiple Same Name Inheritance: In cases where a class inherits from multiple classes with the same function name, the oldest class in the inheritance chain takes precedence. This ensures a predictable order of function resolution.
+- Constructor Function: Each class may have a constructor function, which is called with parameters when an object of that class is created. This function initializes the object's state and performs any necessary setup.
 
-## How to Use PyTestique:
+### Objects
+- Instantiation of Class Definition: Objects instantiate a class definition with arguments provided for the constructor. This allows for customization of object properties and initial states.
+- Accessing Objects via ObjectGet and ObjectSet: Objects are accessed using special functions, namely objectget and objectset. These functions allow for getting and setting properties of the object, respectively.
+- Automatic Injection for Function Calls: To call object functions, the object instance injects itself automatically into the function in the background. This is achieved using the mount command, which links the object via its ID. The injected parameter ensures that the object's context is available within the function.
+- Interaction with Object Functions: Objects can interact with functions defined in their class, utilizing the injected parameter. This allows objects to perform actions, modify internal states, and execute class-defined logic.
+- Function Execution in the Object Context: When a function is executed within an object context, it operates on the specific instance of the class, enabling the use of instance-specific data and behavior.
+
+## How to Use PyTerpreter:
 
 1. Installation: PyTerpreter is a single Python source file that can be included in your project by
 checking out the source file. Additionally, a "reporting.py" file is provided for an easy-to-read reporting analysis.
@@ -99,7 +115,7 @@ checking out the source file. Additionally, a "reporting.py" file is provided fo
 The various commands like "print," "set," and "if" and how to use them are found in the
 language specification file. Group operations logically and keep them within sequences for organized scripting.
 3. Executing Scripts: Execute scripts by running the interpreter with the desired script file. Example, 
-python PyTestique.py exampleFile.json !!! rename ending when chosen !!!!
+python PyTerpreter.py exampleFile.gsc
 </br> Additionally, add --trace traceFile.log to save a trace file in the after named log file.
 4. Reporting: Trace files can be displayed in a more readable way through the "reporting.py" file. Example,
 python reporting.py traceFile.log
@@ -120,42 +136,3 @@ Example Script:
     ]]
 ]
 ```
-
-
-
-# Draft Design Decisions:
-
-M1:
-- ensure helper methods instead of assert
-- each operation in grouped classes as static methods
-- set checks all environments begin at the root and tries to set where present downwards and if new stores in the leave envirnoment
-- get retrieves in the opposite order of set upward the environment tree
-- operations which are not allowed to be nested return "illegal" this way the interpreter can ensure that there's no illegal nesting going on
-- if has optional parameter for the else instructions
-- all instructions have to be sequence
-- every time the execute detects and executes a sequence a new environment gets created and destroyed when the sequences finishes
-- when a new environment gets created it automatically appends itself when possible at the bottom of the environment tree 
-- the environments handle scopes aka variable contexts
-- when a environment gets destroyed it removes itself from the global environment tree
-- destroyed environments can not be reached and are illegal to access
-- the interpreter stores a map which links all commands to the corresponding internal logic
-- the interpreter loads code automatically based on cli args and parses it as a json
-- the interpreters execute method is similar to the do method and handles dynamically sequences, operations and values
--  let python do the handling of operations with different types like list + list, true or dict, string == object, etc.
-- use previous and next to navigate through environment tree
-- don't use key word "seq" but instead find out ourselves, where sequence starts and ends
-
-M2:
-- array is fixed size
-- access array with special get set functions and index
-- access dictionary with special get set functions and key
-- merge dictionary with second overriding existing keys in first
-- loop implemented while with boolean condition and possible infinite runtime
-- define function stores copy of itself, call execute the copy
-- all instructions have to be sequences
-- optional return keyword for functions only 
-- return keyword ends function execution
-- return passes value back to call operation
-- function parameters get mapped one to one with argument call values
-- parameters get set by inserting set operations at the beginning of function
-- return kills fucntion environment and all children
