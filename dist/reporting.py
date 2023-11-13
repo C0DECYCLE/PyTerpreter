@@ -1,14 +1,13 @@
 import sys
 from datetime import datetime
-from typing import Dict, Union, List
 
 
 class TraceReporter:
     def __init__(self, traceFile: str):
         self.traceFile: str = traceFile
-        self.functions: Dict[str, Dict[str, Union[int, float, datetime]]] = {}
+        self.functions: dict[str, dict[str, [int | float | datetime]]] = {}
 
-        lines: List[str] = self.__readFile()
+        lines: list[str] = self.__readFile()
         self.__processTraceData(lines)
         self.__generateReport()
 
@@ -21,13 +20,13 @@ class TraceReporter:
             rightPadding += 1
         return leftPadding, rightPadding
 
-    def __readFile(self) -> List[str]:
+    def __readFile(self) -> list[str]:
         with open(self.traceFile, "r") as file:
-            lines: List[str] = file.readlines()
+            lines: list[str] = file.readlines()
 
         return lines
 
-    def __processTraceData(self, lines: List[str]) -> None:
+    def __processTraceData(self, lines: list[str]) -> None:
         for line in lines:
             functionID, funtionName, event, timestampStr = map(
                 str.strip, line.split(",")
