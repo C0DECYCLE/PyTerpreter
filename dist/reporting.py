@@ -8,12 +8,12 @@ class TraceReporter:
         self.traceFile: str = traceFile
         self.functions: Dict[str, Dict[str, Union[int, float, datetime]]] = {}
 
-        lines: List[str] = self.ReadFile()
-        self.ProcessTraceData(lines)
-        self.generateReport()
+        lines: List[str] = self.__readFile()
+        self.__processTraceData(lines)
+        self.__generateReport()
 
     @staticmethod
-    def CalculatePadding(maxSeperatorLength: int) -> tuple[int, int]:
+    def __calculatePadding(maxSeperatorLength: int) -> tuple[int, int]:
         leftPadding: int = (maxSeperatorLength - len("Function Name")) // 2
         rightPadding: int = maxSeperatorLength - len("Function Name") - leftPadding
 
@@ -21,13 +21,13 @@ class TraceReporter:
             rightPadding += 1
         return leftPadding, rightPadding
 
-    def ReadFile(self) -> List[str]:
+    def __readFile(self) -> List[str]:
         with open(self.traceFile, "r") as file:
             lines: List[str] = file.readlines()
 
         return lines
 
-    def ProcessTraceData(self, lines: List[str]) -> None:
+    def __processTraceData(self, lines: List[str]) -> None:
         for line in lines:
             functionID, funtionName, event, timestampStr = map(
                 str.strip, line.split(",")
@@ -52,11 +52,11 @@ class TraceReporter:
                 self.functions[funtionName]["totalTime"] += elapsedTime
                 self.functions[funtionName]["calls"] += 1
 
-    def generateReport(self) -> None:
+    def __generateReport(self) -> None:
         maxNameLength: int = max(len(name) for name in self.functions.keys())
         maxSeperatorLength: int = max(maxNameLength, 13)
 
-        leftPadding, rightPadding = self.CalculatePadding(maxSeperatorLength)
+        leftPadding, rightPadding = self.__calculatePadding(maxSeperatorLength)
 
         print(
             f"|{' ' * leftPadding}Function Name{' ' * rightPadding} | Num. of calls  |  Total Time (ms) |  Average Time (ms)  |"
