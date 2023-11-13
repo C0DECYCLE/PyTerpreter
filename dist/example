@@ -187,21 +187,24 @@
         ]]]
     ]]],
     ["set", "testFoo", ["object", ["get", "Foo"], []]],
-
     ["print", ["objectGet", ["get", "testFoo"], "aa"]],
-
-    ["print", "STOP"],
-
     ["print", ["call", ["objectGet", ["get", "testFoo"], "add"], [7]]],
 
+    ["set", "testFoo2", ["object", ["get", "Foo"], []]],
+    ["objectSet", ["get", "testFoo2"], "aa", 4],
+    ["print", ["objectGet", ["get", "testFoo2"], "aa"]],
+    ["print", ["call", ["objectGet", ["get", "testFoo2"], "add"], [8]]],
+    ["print", ["call", ["objectGet", ["get", "testFoo"], "add"], [8]]],
 
     ["set", "Bar", ["class", [
-        ["set", "hello", "hello"],
+        ["set", "prefix", "hello "],
         ["set", "constructor", ["function", ["name"], [
-            ["print", ["add", ["get", "hello"], ["get", "name"]]]
+            ["print", ["add", ["get", "prefix"], ["get", "name"]]]
         ]]],
         ["set", "something", ["function", [], [
             ["print", "something!"]
         ]]]
-    ]]]
+    ]]],
+    ["set", "testBar", ["object", ["get", "Bar"], ["bob"]]],
+    ["call", ["objectGet", ["get", "testBar"], "something"], []]
 ]

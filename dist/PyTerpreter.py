@@ -2,6 +2,7 @@ from __future__ import annotations
 import json
 import sys
 from copy import deepcopy
+from uuid import uuid4
 
 Illegal = "illegal"
 
@@ -196,8 +197,6 @@ class PyTerpreterSystem:
         value: any = interpreter.execute(args[0])
         PyTerpreterEnsure.NotIllegal(value)
         print(value)
-        if value == "STOP":
-            pass
         return Illegal
 
     Operations: dict = {
@@ -439,12 +438,58 @@ class PyTerpreterFunction:
         PyTerpreterEnsure.Operation(function, "function")
         arguments: list = args[1]
         PyTerpreterEnsure.Type(arguments, list)
-        PyTerpreterFunction.InjectArguments(interpreter, function, arguments)
-        return interpreter.execute(function[2], "function")
+        mountIndex, mount = PyTerpreterFunction.__FetchMount(interpreter, function[2])
+        PyTerpreterFunction.__InjectArguments(
+            interpreter, function, arguments, mountIndex
+        )
+        return interpreter.execute(function[2], "function", False, None, mount)
 
     @staticmethod
-    def InjectArguments(
-        interpreter: PyTerpreter, function: list, arguments: list
+    def Mount(interpreter: PyTerpreter, args: list) -> Illegal:
+        PyTerpreterEnsure.Length(args, 1)
+        id: str = args[0]
+        PyTerpreterEnsure.Type(id, str)
+        PyTerpreterEnsure.NotIllegal(id)
+        return Illegal
+
+    @staticmethod
+    def __FetchMount(
+        interpreter: PyTerpreter, program: list
+    ) -> tuple[int, PyTerpreterEnvironment | None]:
+        mount: PyTerpreterEnvironment | None = None
+        index: int | None = PyTerpreterFunction.__FetchMountIndex(program)
+        if index is None:
+            index = -1
+        else:
+            id: str = program[index][1]
+            mount = PyTerpreterFunction.__FetchEnvironmentById(
+                interpreter.environment, id
+            )
+        return index, mount
+
+    @staticmethod
+    def __FetchMountIndex(program: list) -> int | None:
+        PyTerpreterEnsure.Sequence(program)
+        for i in range(len(program)):
+            operation: list = program[i]
+            if operation[0] == "mount":
+                return i
+        return None
+
+    @staticmethod
+    def __FetchEnvironmentById(
+        environment: PyTerpreterEnvironment, id: str
+    ) -> PyTerpreterEnvironment | None:
+        target: PyTerpreterEnvironment | None = environment.fetchById(id)
+        if target is not None:
+            return target
+        if environment.next is not None:
+            return PyTerpreterFunction.__FetchEnvironmentById(environment.next, id)
+        return None
+
+    @staticmethod
+    def __InjectArguments(
+        interpreter: PyTerpreter, function: list, arguments: list, mountIndex: int
     ) -> None:
         parameters: list[str] = function[1]
         PyTerpreterEnsure.Ensure(
@@ -454,7 +499,7 @@ class PyTerpreterFunction:
         for i in range(len(parameters)):
             value: any = interpreter.execute(arguments[i])
             operation: list = ["set", parameters[i], value]
-            program.insert(0, operation)
+            program.insert(mountIndex + 1, operation)
 
     @staticmethod
     def Return(interpreter: PyTerpreter, args: list) -> Illegal:
@@ -480,7 +525,12 @@ class PyTerpreterFunction:
         )
         return PyTerpreterFunction.__FetchFunctionEnvironment(environment.previous)
 
-    Operations: dict = {"function": Function, "call": Call, "return": Return}
+    Operations: dict = {
+        "function": Function,
+        "call": Call,
+        "mount": Mount,
+        "return": Return,
+    }
 
 
 class PyTerpreterClass:
@@ -512,10 +562,24 @@ class PyTerpreterObject:
         PyTerpreterEnsure.Class(program)
         arguments: list = args[1]
         PyTerpreterEnsure.Type(arguments, list)
+        environment: PyTerpreterEnvironment = interpreter.autoEnvironment("object")
+        PyTerpreterObject.__Mount(program, environment.id)
+        interpreter.execute(program, "object", True, environment)
+        interpreter.environment.store(environment.id, environment)
         constructor: list | None = PyTerpreterObject.__GetConstructor(program)
         if constructor is not None:
-            PyTerpreterFunction.InjectArguments(interpreter, constructor, arguments)
-        return interpreter.execute(program, "object", True)
+            interpreter.execute(["call", constructor, arguments])
+        interpreter.environment.delete(environment.id)
+        return environment
+
+    @staticmethod
+    def __Mount(program: list, id: str) -> None:
+        PyTerpreterEnsure.Class(program)
+        for operation in program:
+            value: any = operation[2]
+            if isinstance(value, list) and value[0] == "function":
+                function: list = value[2]
+                function.insert(0, ["mount", id])
 
     @staticmethod
     def __GetConstructor(program: list) -> list | None:
@@ -561,6 +625,7 @@ class PyTerpreterEnvironment:
     def __init__(
         self, usage: str, previous: PyTerpreterEnvironment | None = None
     ) -> None:
+        self.__id: str = str(uuid4())
         self.__usage: str = usage
         self.__previous: PyTerpreterEnvironment | None = None
         self.__next: PyTerpreterEnvironment | None = None
@@ -568,6 +633,11 @@ class PyTerpreterEnvironment:
         self.__kill: bool = False
         self.__isDestroyed: bool = False
         self.attach(previous)
+
+    @property
+    def id(self) -> str:
+        self.__notDestroyed()
+        return self.__id
 
     @property
     def usage(self) -> str:
@@ -634,8 +704,25 @@ class PyTerpreterEnvironment:
         PyTerpreterEnsure.Includes(name, self.__fields)
         return self.__fields[name]
 
+    def delete(self, name: str) -> None:
+        self.__notDestroyed()
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        PyTerpreterEnsure.Includes(name, self.__fields)
+        del self.__fields[name]
+
+    def fetchById(self, id: str) -> PyTerpreterEnvironment | None:
+        if self.id == id:
+            return self
+        for value in self.__fields.values():
+            if isinstance(value, PyTerpreterEnvironment) and value.id == id:
+                return value
+        return None
+
     def detach(self) -> None:
         self.__notDestroyed()
+        if self.previous is None:
+            return
         self.previous.setNext(None)
         self.setPrevious(None)
 
@@ -691,37 +778,60 @@ class PyTerpreter:
             return json.load(reader)
 
     def execute(
-        self, program: any, usage: str | None = None, preserve: bool = False
+        self,
+        program: any,
+        usage: str | None = None,
+        preserve: bool = False,
+        environment: PyTerpreterEnvironment | None = None,
+        mount: PyTerpreterEnvironment | None = None,
     ) -> any:
         PyTerpreterEnsure.NotIllegal(program)
         if isinstance(program, list):
             if isinstance(program[0], list):
-                return self.__executeSequence(program, usage, preserve)
+                return self.__executeSequence(
+                    program, usage, preserve, environment, mount
+                )
             else:
                 return self.__executeOperation(program)
         else:
             return program
 
+    def autoEnvironment(self, usage: str | None) -> PyTerpreterEnvironment:
+        return PyTerpreterEnvironment(usage or "sequence", self.environment.lowest())
+
     def __executeSequence(
-        self, sequence: list, usage: str | None, preserve: bool
+        self,
+        sequence: list,
+        usage: str | None,
+        preserve: bool,
+        target: PyTerpreterEnvironment | None,
+        mount: PyTerpreterEnvironment | None,
     ) -> any:
         PyTerpreterEnsure.Sequence(sequence)
-        above: PyTerpreterEnvironment = self.environment.lowest()
-        environment: PyTerpreterEnvironment = PyTerpreterEnvironment(
-            usage or "sequence", above
-        )
+        self.__mountEnvironment(mount)
+        environment: PyTerpreterEnvironment = target or self.autoEnvironment(usage)
         for program in sequence:
             if environment.kill:
                 break
             self.execute(program)
         if preserve:
             environment.detach()
+            self.__unmountEnvironment(mount)
             return environment
         returnValue: any = None
         if usage == "function" and environment.exists("return"):
             returnValue = environment.retrieve("return")
         environment.destroy()
+        self.__unmountEnvironment(mount)
         return returnValue
+
+    def __mountEnvironment(self, mount: PyTerpreterEnvironment | None):
+        if mount is not None:
+            mount.attach(self.environment.lowest())
+
+    def __unmountEnvironment(self, mount: PyTerpreterEnvironment | None):
+        if mount is not None:
+            mount.detach()
 
     def __executeOperation(self, program: list) -> any:
         operator: str = program[0]
