@@ -59,6 +59,7 @@ Language Specification:
 	    - inherit: ["inherit", "function"]: ["function", "parameter"[], instructions]
 	    ! When inherited instructions get merged and overwritten ones get cached !
 	    ! Inherit operation fetches from cache !
+	    ! When multiple same name inheritances in the past return oldest!
 	Object:
 	    - object: ["object", ["class", ?inheritance, instructions], value[]]: environment
 	Object operations:

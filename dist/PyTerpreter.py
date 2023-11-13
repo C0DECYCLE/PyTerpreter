@@ -540,14 +540,34 @@ class PyTerpreterClass:
         program: list = args[-1]
         PyTerpreterEnsure.Class(program)
         if length == 2:
-            inheritor: list = args[0]
-            PyTerpreterEnsure.Type(inheritor, list)
-            return ["class", inheritor, program]
+            ancestor: list = args[0]
+            PyTerpreterEnsure.Type(ancestor, list)
+            return ["class", ancestor, program]
         return ["class", program]
 
     @staticmethod
     def Inherit(interpreter: PyTerpreter, args: list) -> list:
-        pass
+        PyTerpreterEnsure.Length(args, 1)
+        name: str = interpreter.execute(args[0])
+        PyTerpreterEnsure.Type(name, str)
+        PyTerpreterEnsure.NotIllegal(name)
+        collisionCache: list | None = PyTerpreterClass.__RetrieveCacheUpwards(
+            interpreter.environment.lowest()
+        )
+        PyTerpreterEnsure.Type(collisionCache, list)
+        for item in collisionCache:
+            if item[0] == name:
+                return item[1]
+        PyTerpreterEnsure.Ensure(
+            False,
+            f"Illegal inherit of unknown function name ({name} -> {collisionCache}).",
+        )
+
+    @staticmethod
+    def __RetrieveCacheUpwards(environment: PyTerpreterEnvironment) -> list | None:
+        if environment.cache is not None or environment.previous is None:
+            return environment.cache
+        return PyTerpreterClass.__RetrieveCacheUpwards(environment.previous)
 
     Operations: dict = {"class": Class, "inherit": Inherit}
 
@@ -558,19 +578,62 @@ class PyTerpreterObject:
         PyTerpreterEnsure.Length(args, 2)
         instantiate: list = interpreter.execute(args[0])
         PyTerpreterEnsure.Operation(instantiate, "class")
-        program: list = deepcopy(instantiate[-1])
+        program, collisionCache = PyTerpreterObject.__Inherit(interpreter, instantiate)
         PyTerpreterEnsure.Class(program)
         arguments: list = args[1]
         PyTerpreterEnsure.Type(arguments, list)
         environment: PyTerpreterEnvironment = interpreter.autoEnvironment("object")
+        environment.setCache(collisionCache)
         PyTerpreterObject.__Mount(program, environment.id)
         interpreter.execute(program, "object", True, environment)
+        # temporary save for mount of constructor to find object
         interpreter.environment.store(environment.id, environment)
         constructor: list | None = PyTerpreterObject.__GetConstructor(program)
         if constructor is not None:
             interpreter.execute(["call", constructor, arguments])
         interpreter.environment.delete(environment.id)
         return environment
+
+    @staticmethod
+    def __Inherit(interpreter: PyTerpreter, definition: list) -> tuple[list, list]:
+        PyTerpreterEnsure.Operation(definition, "class")
+        if len(definition) == 2:
+            collisionCache: list = []
+            return deepcopy(definition[1]), collisionCache
+        ancestor: list = interpreter.execute(definition[1])
+        return PyTerpreterObject.__MergeAncestor(
+            PyTerpreterObject.__Inherit(interpreter, ancestor), deepcopy(definition[2])
+        )
+
+    @staticmethod
+    def __MergeAncestor(
+        ancestor: tuple[list, list], program: list
+    ) -> tuple[list, list]:
+        PyTerpreterEnsure.Class(program)
+        ancestorProgram: list = ancestor[0]
+        PyTerpreterEnsure.Class(ancestorProgram)
+        result: list = program
+        collisionCache: list = ancestor[1]
+        ancestorProgram.reverse()
+        for operation in ancestorProgram:
+            name: str = operation[1]
+            if PyTerpreterObject.__CollisionInClass(result, name):
+                collisionCache.append((name, operation[2]))
+                continue
+            result.insert(0, operation)
+        return result, collisionCache
+
+    @staticmethod
+    def __CollisionInClass(program: list, name: str) -> bool:
+        PyTerpreterEnsure.Class(program)
+        for operation in program:
+            if (
+                operation[1] == name
+                and isinstance(operation[2], list)
+                and operation[2][0] == "function"
+            ):
+                return True
+        return False
 
     @staticmethod
     def __Mount(program: list, id: str) -> None:
@@ -630,6 +693,7 @@ class PyTerpreterEnvironment:
         self.__previous: PyTerpreterEnvironment | None = None
         self.__next: PyTerpreterEnvironment | None = None
         self.__fields: dict = {}
+        self.__cache: list | None = None
         self.__kill: bool = False
         self.__isDestroyed: bool = False
         self.attach(previous)
@@ -653,6 +717,11 @@ class PyTerpreterEnvironment:
     def next(self) -> PyTerpreterEnvironment | None:
         self.__notDestroyed()
         return self.__next
+
+    @property
+    def cache(self) -> list | None:
+        self.__notDestroyed()
+        return self.__cache
 
     @property
     def kill(self) -> bool:
@@ -710,6 +779,9 @@ class PyTerpreterEnvironment:
         PyTerpreterEnsure.NotIllegal(name)
         PyTerpreterEnsure.Includes(name, self.__fields)
         del self.__fields[name]
+
+    def setCache(self, cache: list) -> None:
+        self.__cache = cache
 
     def fetchById(self, id: str) -> PyTerpreterEnvironment | None:
         if self.id == id:
