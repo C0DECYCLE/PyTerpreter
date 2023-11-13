@@ -1,0 +1,10 @@
+358887,add_cubes,start,2023-10-24 19:20:08.045086
+270697,get_cube_power,start,2023-10-24 19:20:08.045279
+270697,get_cube_power,stop,2023-10-24 19:20:08.045657
+137801,get_cube_power,start,2023-10-24 19:20:08.045788
+137801,get_cube_power,stop,2023-10-24 19:20:08.045850
+358887,add_cubes,stop,2023-10-24 19:20:08.045898
+666666,verylongfunctionnamethattmakesnosenseandisjusttotesttheadaptabilityoftheformating,start,2023-10-24 19:21:08.045898
+232323,verylongfunctionnamethattmakesnosenseandisjusttotesttheadaptabilityoftheformating,start,2023-10-24 19:21:08.046898
+666666,verylongfunctionnamethattmakesnosenseandisjusttotesttheadaptabilityoftheformating,stop,2023-10-24 19:21:08.146898
+232323,verylongfunctionnamethattmakesnosenseandisjusttotesttheadaptabilityoftheformating,stop,2023-10-24 19:21:08.047298
