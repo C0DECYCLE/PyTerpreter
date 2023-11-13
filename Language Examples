@@ -16,7 +16,7 @@
         ["set", "constructor", ["function", ["shapeSize"], [
             ["call", ["inherit", "constructor"], []],
             ["set", "size", ["get", "shapeSize"]]
-        ]]]
+        ]]],
 
         ["set", "add", ["function", ["b"], [
             ["call", ["inherit", "add"], []],

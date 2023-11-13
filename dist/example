@@ -176,5 +176,84 @@
         ["return", "wrong"]
     ]]],
 
-    ["print", ["call", ["get", "customFuckUp"], []]]
+    ["print", ["call", ["get", "customFuckUp"], []]],
+
+    ["print", "\n-------------------- Class Object ----------------------"],
+
+    ["set", "Foo", ["class", [
+        ["set", "aa", 3],
+        ["set", "add", ["function", ["bb"], [
+            ["return", ["add", ["get", "aa"], ["get", "bb"]]]
+        ]]]
+    ]]],
+
+    ["set", "testFoo", ["object", ["get", "Foo"], []]],
+    ["print", ["objectGet", ["get", "testFoo"], "aa"]],
+    ["print", ["call", ["objectGet", ["get", "testFoo"], "add"], [7]]],
+
+    ["set", "testFoo2", ["object", ["get", "Foo"], []]],
+    ["objectSet", ["get", "testFoo2"], "aa", 4],
+    ["print", ["objectGet", ["get", "testFoo2"], "aa"]],
+    ["print", ["call", ["objectGet", ["get", "testFoo2"], "add"], [8]]],
+    ["print", ["call", ["objectGet", ["get", "testFoo"], "add"], [8]]],
+
+    ["set", "Bar", ["class", ["get", "Foo"], [
+        ["set", "prefix", "hello "],
+        ["set", "constructor", ["function", ["name"], [
+            ["print", ["add", ["get", "prefix"], ["get", "name"]]]
+        ]]],
+        ["set", "something", ["function", [], [
+            ["print", "something!"]
+        ]]]
+    ]]],
+
+    ["set", "testBar", ["object", ["get", "Bar"], ["bob"]]],
+    ["print", ["objectGet", ["get", "testBar"], "aa"]],
+    ["call", ["objectGet", ["get", "testBar"], "something"], []],
+    ["print", ["call", ["objectGet", ["get", "testBar"], "add"], [6]]],
+
+    ["object", ["class", [
+        ["set", "constructor", ["function", ["msg"], [
+            ["print", ["get", "msg"]]
+        ]]]
+    ]], ["some wild shit"]],
+
+    ["set", "Shape", ["class", ["get", "Bar"], [
+        ["set", "size", 0],
+        ["set", "aa", 2],
+        ["set", "constructor", ["function", ["name", "shapeSize"], [
+            ["call", ["inherit", "constructor"], [["get", "name"]]],
+            ["set", "size", ["get", "shapeSize"]]
+        ]]],
+        ["set", "add", ["function", ["b"], [
+            ["set", "old", ["call", ["inherit", "add"], [["get", "b"]]]],
+            ["set", "result", ["add", ["get", "aa"], ["get", "old"]]],
+            ["return", ["get", "result"]]
+        ]]]
+    ]]],
+
+    ["set", "abc", ["object", ["get", "Shape"], ["john", 32]]],
+    ["print", ["objectGet", ["get", "abc"], "size"]],
+    ["print", ["objectGet", ["get", "abc"], "prefix"]],
+    ["print", ["objectGet", ["get", "abc"], "aa"]],
+    ["call", ["objectGet", ["get", "abc"], "something"], []],
+    ["print", ["call", ["objectGet", ["get", "abc"], "add"], [10]]],
+
+    ["set", "Window", ["class", [
+        ["set", "size", 0],
+        ["set", "constructor", ["function", ["windowSize"], [
+            ["set", "size", ["get", "windowSize"]]
+        ]]]
+    ]]],
+    ["set", "House", ["class", [
+        ["set", "windows", ["array", 4]],
+        ["set", "constructor", ["function", [], [
+            ["arraySet", ["get", "windows"], 0, ["object", ["get", "Window"], [3]]],
+            ["arraySet", ["get", "windows"], 1, ["object", ["get", "Window"], [7]]],
+            ["arraySet", ["get", "windows"], 2, ["object", ["get", "Window"], [4]]],
+            ["arraySet", ["get", "windows"], 3, ["object", ["get", "Window"], [5]]]
+        ]]]
+    ]]],
+    ["set", "myHouse", ["object", ["get", "House"], []]],
+    ["print", ["objectGet", ["arrayGet", ["objectGet", ["get", "myHouse"], "windows"], 1], "size"]]
 ]
