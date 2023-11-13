@@ -107,6 +107,13 @@ a value back to the call operation.
 - Interaction with Object Functions: Objects can interact with functions defined in their class, utilizing the injected parameter. This allows objects to perform actions, modify internal states, and execute class-defined logic.
 - Function Execution in the Object Context: When a function is executed within an object context, it operates on the specific instance of the class, enabling the use of instance-specific data and behavior.
 
+### Reporting
+- Initialization: The whole file gets executed through the init of the TraceReporter.
+- Dynamic Padding: The padding for the function name gets dynamically adapted to the longest function name, ensuring
+ clean display of data.
+- ID is dictionary key with a dictionary as its value.
+ The inner dictionary holds the data for calls, total time and start time. This is to separate ID from function name.
+
 ## How to Use PyTerpreter:
 
 1. Installation: PyTerpreter is a single Python source file that can be included in your project by
