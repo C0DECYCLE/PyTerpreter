@@ -3,6 +3,7 @@
 PyTerpreter is a lightweight Python interpreter designed for simplicity and ease of use. It provides a convenient
 interface for executing Python-like commands and scripts. This interpreter is suitable for small to
 medium-sized projects and is built with a focus on clarity and clean design.
+(https://github.com/C0DECYCLE/PyTerpreter.git)
 
 ## Key Features:
 - Basic Operations: PyTerpreter supports fundamental Python-like operations, making it suitable for various scripting tasks.
@@ -17,11 +18,9 @@ providing flexibility in script structure.
 ### Code Organization
 - Use of "Ensure" Helper Methods: PyTerpreter prioritizes the use of "Ensure" helper methods over assert statements,
 enhancing code robustness and scalability with clear error messages.
-
 - Grouping Operations into Classes: Operations are organized into classes like "PyTerpreterBoolean" or
 "PyTerpreterConditional" with static methods. These all get handle through the command logic mapping, so they can
 be used in the main class.
-
 - Command-Logic Mapping: PyTerpreter maintains a map linking commands to internal logic, simplifying execution.
 All commands get added in the init of the PyTerpreter class, from where it can be executed as a command in
 the PyTerpreter language. This structure improves code organization and readability.
@@ -31,11 +30,9 @@ the PyTerpreter language. This structure improves code organization and readabil
 environment that already has that variable name. If no previous variable value is found, the variable with the value
 is stored in the current leaf environment. 
 This ensures correct updating and "placement" of a variable, so it is in the right scope.
-
 - Get Operation Behavior: The "get" operation retrieves variables in the opposite, from the current environment up
 the tree until root. Once more this ensures the right scope when getting a variable, picking the "closest" environment
 where a variable had been set.
-
 - Illegal Nesting Prevention: Operations not allowed to be nested return "illegal," preventing undesirable nesting.
 So "Illegal" is a predefined keyword the user can't use when coding in PyTerpreter. There is also a helper function
 in the PyTerpreterEnsure class.
@@ -43,9 +40,7 @@ in the PyTerpreterEnsure class.
 ### Script logic
 - Optional "If" Parameter: The "if" operation includes an optional "else" parameter, enhancing script logic flexibility.
 The exact build up of else can be read in the Language Specification file.
-
 - Sequence Requirement: All instructions must be part of a sequence, enforcing a structured script format.
-
 - Avoidance of "Seq" Keyword: PyTerpreter determines sequence boundaries without relying on a dedicated "seq" keyword.
 This is done in the PyTerpreterEnsure.Sequence methode by checking if all the entries in the list are 
 of type list themselves.
@@ -57,17 +52,13 @@ Environments handle scopes and variable contexts for clean encapsulation.
 - Dynamic Environment Handling: New environments are created with every sequence. 
 They get systematically destroyed with each executed sequence.
 This avoids memory leaks, improves performance because of smaller tress and makes the illegal to access.
-
 - Automatic Environment Appending: Newly created environments automatically append themselves to the global tree.
-
 - Environment Navigation via Previous and Next: "Previous" and "next" pointers navigate
 efficiently through the environment tree.
 
 ### Execution and Integration
 - Automatic Code Loading: Code is loaded automatically based on command-line arguments, parsed as JSON.
-
 - Dynamic Execution Handling: The execute method dynamically handles sequences, operations, and values.
-
 - Utilizing Python's Type Handling: Python's native type handling is leveraged for operations involving different types,
 like list + list, true or dict, string == object, etc.
 
@@ -107,6 +98,13 @@ a value back to the call operation.
 - Interaction with Object Functions: Objects can interact with functions defined in their class, utilizing the injected parameter. This allows objects to perform actions, modify internal states, and execute class-defined logic.
 - Function Execution in the Object Context: When a function is executed within an object context, it operates on the specific instance of the class, enabling the use of instance-specific data and behavior.
 
+### Tracing
+- Definition: Tracing is done by the class PyTerpreterTrace
+- Decorator:  The trace decorator accesses the interpreter via de args and executes the tracing in the tracing class.
+- Return Value: It is important to return the return value of the call function in the decorator after the tracing is done else none gets returned.
+- Tracking: A list in the form of [id, functionName, start or end, and timestamp] gets appended to a list of traced functions once before and once after the function call is called. If the function is anonymous it gets logged with brackets. The same happens with inherited functions.
+- Logging: when the run is finished and tracing is wanted (--trace filename.log is written in the commandline) all the traced functions get written to a file one by one in RSV format ready for reporting.
+
 ### Reporting
 - Initialization: The whole file gets executed through the init of the TraceReporter.
 - Dynamic Padding: The padding for the function name gets dynamically adapted to the longest function name, ensuring
@@ -126,6 +124,8 @@ python PyTerpreter.py exampleFile.gsc
 </br> Additionally, add --trace traceFile.log to save a trace file in the after named log file.
 4. Reporting: Trace files can be displayed in a more readable way through the "reporting.py" file. Example,
 python reporting.py traceFile.log
+
+> For detailed usage explanation of the language, please see the "Language Specification" file.
 
 Example Script:
     Here's an example script showcasing various functionalities of the PyTerpreter Language:
