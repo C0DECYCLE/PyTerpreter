@@ -1,8 +1,10 @@
 from __future__ import annotations
 import json
 import sys
+from datetime import datetime
 from copy import deepcopy
 from uuid import uuid4
+import uuid
 
 Illegal = "illegal"
 
@@ -420,6 +422,19 @@ class PyTerpreterLoop:
     Operations: dict = {"while": While, "repeat": Repeat}
 
 
+def trace(function) -> callable:
+    def _inner(*args) -> any:
+        identity: str = str(int(str(uuid.uuid4().int)[:6]))
+        interpreter: PyTerpreter = args[0]
+        functionName: str = interpreter.trace.getFunctionName(args[1])
+        interpreter.trace.beforeCall(identity, functionName)
+        value: any = function(*args)
+        interpreter.trace.afterCall(identity, functionName)
+        return value
+
+    return _inner
+
+
 class PyTerpreterFunction:
     @staticmethod
     def Function(interpreter: PyTerpreter, args: list) -> list:
@@ -432,6 +447,7 @@ class PyTerpreterFunction:
         return ["function", parameters, program]
 
     @staticmethod
+    @trace
     def Call(interpreter: PyTerpreter, args: list) -> any:
         PyTerpreterEnsure.Length(args, 2)
         function: list = deepcopy(interpreter.execute(args[0]))
@@ -828,6 +844,50 @@ class PyTerpreterEnvironment:
         )
 
 
+class PyTerpreterTrace:
+    def __init__(self, cliArgs) -> None:
+        PyTerpreterEnsure.Length(cliArgs, (2, 4))
+        self.__outputTrace: bool = len(cliArgs) == 4 and cliArgs[2] == "--trace"
+        self.__traced: list = []
+        if self.__outputTrace:
+            self.__fileName: str = cliArgs[3]
+
+    def beforeCall(self, identity, functionName) -> None:
+        log: tuple = (
+            identity,
+            functionName,
+            "start",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+        )
+        self.__traced.append(log)
+
+    def afterCall(self, identity, functionName) -> None:
+        log: tuple = (
+            identity,
+            functionName,
+            "stop",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+        )
+        self.__traced.append(log)
+
+    def postExecution(self) -> None:
+        if not self.__outputTrace:
+            return
+        with open(self.__fileName, "w") as file:
+            for traceLog in self.__traced:
+                file.write(",".join(traceLog) + "\n")
+
+    @staticmethod
+    def getFunctionName(args: list) -> str:
+        if args[0][0] == "get":
+            return args[0][1]
+        if args[0][0] == "objectGet":
+            return f"{args[0][1][1]}.{args[0][2]}"
+        if args[0][0] == "inherit":
+            return "[inherit]"
+        return "[anonymous]"
+
+
 class PyTerpreter:
     def __init__(self, cliArgs: list[str]) -> None:
         self.environment: PyTerpreterEnvironment = PyTerpreterEnvironment("global")
@@ -844,10 +904,13 @@ class PyTerpreter:
             **PyTerpreterClass.Operations,
             **PyTerpreterObject.Operations,
         }
+
+        self.trace = PyTerpreterTrace(cliArgs)
         self.execute(self.__load(cliArgs))
+        self.trace.postExecution()
 
     def __load(self, cliArgs: list[str]) -> any:
-        PyTerpreterEnsure.Length(cliArgs, 2)
+        PyTerpreterEnsure.Length(cliArgs, (2, 4))
         with open(sys.argv[1], "r") as reader:
             return json.load(reader)
 
